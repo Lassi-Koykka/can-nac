@@ -1,12 +1,12 @@
-type Entity = number
-abstract class Component { }
-abstract class System {
+export type Entity = number
+export abstract class Component { }
+export abstract class System {
     public abstract componentsRequired: Set<Function>
-    public abstract update(entities: Set<Entity>): void
+    public abstract update(entities: Set<Entity>, delta: number): void
     public ecs: ECS
 }
-type ComponentClass<T extends Component> = new (...args: any[]) => T
-class ComponentContainer {
+export type ComponentClass<T extends Component> = new (...args: any[]) => T
+export class ComponentContainer {
     private map = new Map<Function, Component>();
     public add(component: Component): void {
         this.map.set(component.constructor, component);
@@ -29,7 +29,7 @@ class ComponentContainer {
         this.map.delete(componentClass);
     }
 }
-class ECS {
+export class ECS {
     private nextEntityID = 0;
     private entitiesToDestroy = new Array<Entity>();
     private entities = new Map<Entity, ComponentContainer>();
@@ -88,9 +88,9 @@ class ECS {
     public removeSystem(system: System): void {
         this.systems.delete(system);
     }
-    public update(): void {
+    public update(delta: number): void {
         for (let [system, entities] of this.systems.entries()) {
-            system.update(entities)
+            system.update(entities, delta)
         }
         while (this.entitiesToDestroy.length > 0) {
             this.destroyEntity(this.entitiesToDestroy.pop()!);
