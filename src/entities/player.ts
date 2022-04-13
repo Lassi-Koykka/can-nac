@@ -6,7 +6,7 @@ export const spawnPlayer = (ecs: ECS, x: number, y: number) => {
     const player = ecs.addEntity()
     const components: Component[] = [
         new Position(x, y),
-        new Transform(10, 10),
+        new Transform(17, 15),
         new Collider(ColliderType.RECTANGLE, ColliderTag.PLAYER),
         new Direction(1, 0),
         new Speed(80),

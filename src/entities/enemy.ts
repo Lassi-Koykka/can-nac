@@ -3,22 +3,20 @@ import {Component, ECS} from "../ecs";
 
 
 export const spawnEnemy = (ecs: ECS, x: number, y: number) => {
-    const player = ecs.addEntity()
+    const enemy = ecs.addEntity()
     const components: Component[] = [
         new Position(x, y),
         new Transform(10, 10),
-        new Collider(ColliderType.RECTANGLE, ColliderTag.PLAYER),
-        new Direction(1, 0),
-        new Speed(80),
+        new Collider(ColliderType.RECTANGLE, ColliderTag.ENEMY),
+        new Direction(-1, 0),
+        new Speed(20),
         new Health(3, 3),
-        new Gun(FireMode.SEMIAUTO, 120, 4, 1, 1),
-        new Sprite(SpriteType.PLACEHOLDER, "white"),
-        new InputListener(),
+        new Sprite(SpriteType.PLACEHOLDER, "blue"),
     ]
 
     components.forEach(c => {
-        ecs.addComponent(player, c)
+        ecs.addComponent(enemy, c)
     });
 
-    return player;
+    return enemy;
 }

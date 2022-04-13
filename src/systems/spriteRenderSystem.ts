@@ -31,7 +31,7 @@ export default class SpriteRenderSystem extends System {
           transform.verticalAlign
         );
         ctx.beginPath();
-        ctx.fillRect(drawX, drawY, transform.width, transform.height);
+        ctx.fillRect(Math.round(drawX), Math.round(drawY), transform.width, transform.height);
       }
     });
   }

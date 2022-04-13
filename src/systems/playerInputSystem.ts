@@ -5,8 +5,6 @@ import {Keymap} from "../types";
 import {normalizeVector} from "../utils";
 
 export default class PlayerInputSystem extends System {
-  keymap: Keymap;
-  keymapLastFrame: Keymap;
   componentsRequired = new Set<Function>([
     InputListener,
     Position,
@@ -14,16 +12,8 @@ export default class PlayerInputSystem extends System {
     Direction,
     Gun,
   ]);
-
-  constructor(keymap: Keymap, keymapLastFrame: Keymap) {
-    super();
-    this.keymap = keymap;
-    this.keymapLastFrame = keymapLastFrame;
-  }
   public update(entities: Set<Entity>, _: number): void {
 
-    const keymap = this.keymap;
-    const keymapLastFrame = this.keymapLastFrame;
     entities.forEach((e) => {
       const comps = this.ecs.getComponents(e);
       let dir = comps.get(Direction);
@@ -32,17 +22,13 @@ export default class PlayerInputSystem extends System {
       let gun = comps.get(Gun);
 
       // Static movement, no acceleration
-      if (keymap["w"] === keymap["s"]) dir.y = 0;
-      else {
-        if (keymap["w"]) dir.y = -1;
-        if (keymap["s"]) dir.y = 1;
-      }
+      if (keyPress("w") || (!keyDown("s") && keyDown("w"))) dir.y = -1;
+      if (keyPress("s") || (!keyDown("w") && keyDown("s"))) dir.y = 1;
+      if (!keyDown("w") && !keyDown("s")) dir.y = 0;
 
-      if (keymap["a"] === keymap["d"]) dir.x = 0;
-      else {
-        if (keymap["a"]) dir.x = -1;
-        if (keymap["d"]) dir.x = 1;
-      }
+      if (keyPress("a") || (!keyDown("d") && keyDown("a")) ) dir.x = -1;
+      if (keyPress("d") || (!keyDown("a") && keyDown("d"))) dir.x = 1;
+      if (!keyDown("a") && !keyDown("d")) dir.x = 0;
 
       const normVel = normalizeVector({ x: dir.x, y: dir.y });
       dir.x = normVel.x;
@@ -62,3 +48,8 @@ export default class PlayerInputSystem extends System {
     });
   }
 }
+
+const keyDown = (key: string) => window.keymap[key]
+const keyPress = (key: string) => window.keymap[key] && !window.keymapLastFrame[key]
+const keyUp = (key: string) => !window.keymap[key] && window.keymapLastFrame[key]
+
