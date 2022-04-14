@@ -1,3 +1,5 @@
+import {Align, Position, Transform} from "./components";
+
 export const rotateVector = (vecX: number, vecY: number, angle: number) => {
   let dx = vecX * Math.cos(angle) - vecY * Math.sin(angle);
   let dy = vecX * Math.sin(angle) + vecY * Math.cos(angle);
@@ -28,4 +30,25 @@ export const scale = (number: number, inMin: number, inMax: number, outMin: numb
 
 export const toRadians = (deg: number) => {
   return (deg * Math.PI) / 180;
+}
+
+export const getOrigin = ({x, y}: Position, {width, height, horizontalAlign, verticalAlign}: Transform) => {
+  return {
+    x: removeOffset(x, width, horizontalAlign),
+    y: removeOffset(y, height, verticalAlign)
+  }
+  
+};
+
+const removeOffset = (coord: number, size: number, align: Align) => {
+  switch (align) {
+    case Align.START:
+      return coord;
+    case Align.CENTER:
+      return coord - size / 2;
+    case Align.END:
+      return coord - size;
+    default:
+      return coord;
+  }
 }

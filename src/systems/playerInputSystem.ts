@@ -1,7 +1,6 @@
-import {Direction, Gun, InputListener, Position, Transform} from "../components";
+import {Direction, EntityStatus, Gun, InputListener, Position, Transform} from "../components";
 import {Entity, System} from "../ecs";
 import {spawnBullet} from "../entities/bullet";
-import {Keymap} from "../types";
 import {normalizeVector} from "../utils";
 
 export default class PlayerInputSystem extends System {
@@ -41,7 +40,8 @@ export default class PlayerInputSystem extends System {
             pos.x + transform.width,
             pos.y + transform.width / 2,
             gun.bulletSize,
-            gun.damage
+            gun.damage,
+            EntityStatus.FRIENDLY
           );
         }
       }

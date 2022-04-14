@@ -12,9 +12,15 @@ export enum Align {
   END,
 }
 
-export enum ColliderTag {
+export enum EntityTag {
   PLAYER,
   PROJECTILE,
+  ENEMY,
+}
+
+export enum EntityStatus {
+  FRIENDLY,
+  NEUTRAL,
   ENEMY,
 }
 
@@ -49,7 +55,7 @@ export class Speed extends Component {
 }
 
 export class Collider extends Component {
-  constructor(public type: ColliderType, public tag: ColliderTag) {
+  constructor(public type: ColliderType) {
     super();
   }
 }
@@ -79,6 +85,18 @@ export class Transform extends Component {
 
 export class InputListener extends Component {
   constructor() {
+    super();
+  }
+}
+
+export class Tag extends Component {
+  constructor(public value: EntityTag) {
+    super();
+  }
+}
+
+export class Status extends Component {
+  constructor(public value: EntityStatus) {
     super();
   }
 }

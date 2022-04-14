@@ -1,5 +1,6 @@
-import {Align, Position, Sprite, SpriteType, Transform} from "../components";
+import {Position, Sprite, SpriteType, Transform} from "../components";
 import {Entity, System} from "../ecs";
+import {getOrigin} from "../utils";
 
 export default class SpriteRenderSystem extends System {
   ctx: CanvasRenderingContext2D;
@@ -20,16 +21,7 @@ export default class SpriteRenderSystem extends System {
       if (sprite.spriteType === SpriteType.PLACEHOLDER) {
         ctx.strokeStyle = sprite.source;
         ctx.fillStyle = sprite.source;
-        const drawX = getOrigin(
-          pos.x,
-          transform.width,
-          transform.horizontalAlign
-        );
-        const drawY = getOrigin(
-          pos.y,
-          transform.height,
-          transform.verticalAlign
-        );
+        const {x: drawX, y: drawY} = getOrigin(pos, transform)
         ctx.beginPath();
         ctx.fillRect(Math.round(drawX), Math.round(drawY), transform.width, transform.height);
       }
@@ -37,16 +29,4 @@ export default class SpriteRenderSystem extends System {
   }
 }
 
-const getOrigin = (coord: number, width: number, align: Align) => {
-  switch (align) {
-    case Align.START:
-      return coord;
-    case Align.CENTER:
-      return coord - width / 2;
-    case Align.END:
-      return coord - width;
-    default:
-      return coord;
-  }
-};
 
