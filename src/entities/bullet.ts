@@ -20,7 +20,8 @@ export const spawnBullet = (
   ecs: ECS,
   x: number,
   y: number,
-  bulletSize: number,
+  dir: { x: number, y: number },
+  bulletSize: number | {width: number, height: number},
   damage: number,
   status: EntityStatus
 ) => {
@@ -31,10 +32,12 @@ export const spawnBullet = (
     new Position(x, y),
     new Damage(damage),
     new Collider(ColliderType.RECTANGLE),
-    new Transform(bulletSize, bulletSize, Align.CENTER, Align.CENTER),
-    new Direction(1, 0),
+    (typeof bulletSize === "number" 
+      ? new Transform(bulletSize, bulletSize, Align.CENTER, Align.CENTER)
+      : new Transform(bulletSize.width, bulletSize.height, Align.CENTER, Align.CENTER)),
+    new Direction(dir.x, dir.y),
     new Speed(160),
-    new Sprite(SpriteType.PLACEHOLDER, "red"),
+    new Sprite(SpriteType.STATIC, "yellow", {x: 15, y: 29}),
   ];
 
   components.forEach((c) => {

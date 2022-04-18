@@ -3,8 +3,9 @@ import {spawnEnemy} from "./entities/enemy";
 import { spawnPlayer } from "./entities/player";
 import "./style.css";
 import CollisionSystem from "./systems/collisionSystem";
+import EnemySpawnerSystem from "./systems/enemySpawnerSystem";
 import PlayerInputSystem from "./systems/playerInputSystem";
-import SpriteRenderSystem from "./systems/spriteRenderSystem";
+import RenderingSystem from "./systems/renderingSystem";
 import {randomInt} from "./utils";
 
 const canvas = document.querySelector<HTMLCanvasElement>("#gameCanvas")!;
@@ -32,17 +33,15 @@ const updateKeyMap = (e: KeyboardEvent) => {
 
 const ecs = new ECS();
 const collisionSystem = new CollisionSystem(canvas);
-const spriteRenderSystem = new SpriteRenderSystem(ctx);
+const renderingSystem = new RenderingSystem(ctx, canvas.width, canvas.height);
 const playerInputSystem = new PlayerInputSystem();
+const enemySpawnerSystem = new EnemySpawnerSystem(canvas.width, 7)
 ecs.addSystem(playerInputSystem);
+ecs.addSystem(renderingSystem);
 ecs.addSystem(collisionSystem);
-ecs.addSystem(spriteRenderSystem);
+ecs.addSystem(enemySpawnerSystem)
 
-const player = spawnPlayer(ecs, 20, canvas.height / 2);
-
-for (let i = 0; i < 3; i++) {
-  spawnEnemy(ecs, canvas.width + 10, randomInt(0, canvas.height - 10, true))
-}
+const player = spawnPlayer(ecs, canvas.width / 2, canvas.height - 30);
 
 const runGame = (ctx: CanvasRenderingContext2D) => {
   // ANIMATION PROPERTIES

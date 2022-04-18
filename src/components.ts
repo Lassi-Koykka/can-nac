@@ -2,8 +2,8 @@ import { Component } from "./ecs";
 
 export enum SpriteType {
   PLACEHOLDER,
-  STATIC,
-  ANIMATED,
+  SPRITE,
+  STATIC
 }
 
 export enum Align {
@@ -26,15 +26,24 @@ export enum EntityStatus {
 
 export enum ColliderType {
   RECTANGLE,
-  CIRCLE
+  CIRCLE,
 }
 
 export enum FireMode {
   SEMIAUTO,
   AUTO,
-  BURST
+  BURST,
 }
 
+export interface Gun {
+  fireMode: FireMode;
+  fireRate: number;
+  bulletSize: number;
+  count: number;
+  damage: number;
+}
+
+export type AnimationFrames = {x: number, y: number}[]
 
 export class Position extends Component {
   constructor(public x: number, public y: number) {
@@ -102,13 +111,27 @@ export class Status extends Component {
 }
 
 export class Sprite extends Component {
-  constructor(public spriteType: SpriteType, public source: string) {
+  constructor(
+    public spriteType: SpriteType,
+    public style: string,
+    public coords: { x: number; y: number }
+  ) {
     super();
   }
 }
 
-export class Gun extends Component {
-  constructor(public fireMode: FireMode, public fireRate: number, public bulletSize: number, public count: number, public damage: number) {
+export class Animations extends Component {
+  constructor(
+    public state = "default",
+    public frame = 0,
+    public animations: { [name: string]: AnimationFrames[] } = {"default": []}
+  ){
+    super();
+  }
+}
+
+export class Guns extends Component {
+  constructor(public gunList: Gun[], public active: number = 0 ) {
     super();
   }
 }

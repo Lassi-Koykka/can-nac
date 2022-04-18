@@ -16,7 +16,7 @@ export const normalizeVector = (vec: { x: number, y: number}) => {
     }
 }
 
-export const randomInt = (min: number = 0, max: number, wholeNum: boolean): number => {
+export const randomInt = (min: number = 0, max: number, wholeNum: boolean = true): number => {
     return wholeNum ? Math.floor(Math.random() * (max - min + 1)) + min : Math.random() * (max - min + 1) + min
 }
 
@@ -45,7 +45,7 @@ const removeOffset = (coord: number, size: number, align: Align) => {
     case Align.START:
       return coord;
     case Align.CENTER:
-      return coord - size / 2;
+      return Math.floor(coord - size / 2);
     case Align.END:
       return coord - size;
     default:

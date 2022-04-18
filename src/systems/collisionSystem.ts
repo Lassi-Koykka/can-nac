@@ -55,12 +55,19 @@ export default class CollisionSystem extends System {
 
       // Check collisions
       const collisions = gameObjects.filter((go) =>
-        collision(pos, trans, go.pos, go.trans)
+        go.entity !== entity && collision(pos, trans, go.pos, go.trans)
       );
 
       if (tag === EntityTag.PLAYER) {
         if (newPosX < 2 || newPosX > width - 2 - trans.width) newPosX = pos.x;
         if (newPosY < 2 || newPosY > height - 2 - trans.height) newPosY = pos.y;
+      }
+
+      if (tag === EntityTag.ENEMY) {
+        if (newPosY > height) {
+          this.ecs.removeEntity(entity);
+          console.log("Removing enemy");
+        }
       }
 
       if (tag === EntityTag.PROJECTILE) {

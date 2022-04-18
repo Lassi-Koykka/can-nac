@@ -7,7 +7,7 @@ import {
   Transform,
   InputListener,
   Speed,
-  Gun,
+  Guns,
   FireMode,
   Collider,
   ColliderType,
@@ -21,13 +21,13 @@ export const spawnPlayer = (ecs: ECS, x: number, y: number) => {
   const components: Component[] = [
     new Position(x, y),
     new Tag(EntityTag.PLAYER),
-    new Transform(16, 16),
+    new Transform(28, 28),
     new Collider(ColliderType.RECTANGLE),
-    new Direction(1, 0),
+    new Direction(0, -1),
     new Speed(80),
     new Health(3, 3),
-    new Gun(FireMode.SEMIAUTO, 120, 4, 1, 1),
-    new Sprite(SpriteType.PLACEHOLDER, "white"),
+    new Guns([{fireMode: FireMode.SEMIAUTO, fireRate: 120, bulletSize: 6, count: 1, damage: 1}]),
+    new Sprite(SpriteType.STATIC, "white", {x:0, y:0}),
     new InputListener(),
   ];
 
