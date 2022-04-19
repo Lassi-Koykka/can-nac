@@ -9,8 +9,9 @@ export default class RenderingSystem extends System {
   componentsRequired = new Set<Function>([Position, Sprite]);
   spritesheet: HTMLImageElement;
   background: HTMLImageElement;
-  backgroundYOffset: number = 0;
-  backgroundMoveSpeed = 0.5;
+  backgroundYOffset = 0;
+  animationFps = 6;
+  backgroundMoveSpeed = 3;
 
   constructor(ctx: CanvasRenderingContext2D, canvasWidth: number, canvasHeight: number) {
     super();
@@ -35,8 +36,8 @@ export default class RenderingSystem extends System {
     ctx.drawImage(this.background, 0, backgroundY, this.canvasWidth, this.canvasHeight, 0, 0, this.canvasWidth, this.canvasHeight )
     this.backgroundYOffset += this.backgroundMoveSpeed
 
-    if(backgroundY < -this.canvasHeight) {
-      this.backgroundYOffset = 0
+    if(backgroundY <= -this.canvasHeight) {
+      this.backgroundYOffset = 2
     }
 
     // DRAW ENTITIES

@@ -5,7 +5,12 @@ An ECS driven shoot-em-up game a created using vanilla canvas.
 
 ### Systems and mechanics
 
-- [ ] Enemy spawner system
+- [x] Enemy spawner system
+- [ ] Sound
+- [ ] Enemy movement patterns
+- [ ] Enemy attacks
+- [ ] Player damage
+- [ ] Pausing
 - [ ] Health system
 - [ ] Score and win conditions
 - [ ] Animations
@@ -14,6 +19,10 @@ An ECS driven shoot-em-up game a created using vanilla canvas.
 
 ### Content
 
-- [ ] More enemy types
+- [x] More enemy types
+- [x] More bullet types
 - [ ] More guns
 - [ ] More levels
+
+### Nice-to-have
+- [ ] Level editor

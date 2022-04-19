@@ -122,9 +122,10 @@ export class Sprite extends Component {
 
 export class Animations extends Component {
   constructor(
+    public animations: { [name: string]: AnimationFrames } = {"default": []},
     public state = "default",
     public frame = 0,
-    public animations: { [name: string]: AnimationFrames[] } = {"default": []}
+    public lastFrameTime = 0
   ){
     super();
   }

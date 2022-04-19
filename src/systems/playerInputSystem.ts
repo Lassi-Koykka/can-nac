@@ -43,12 +43,12 @@ export default class PlayerInputSystem extends System {
         const gun = gunList[active];
         spawnBullet(
           this.ecs,
-          pos.x + transform.width / 2 + 1,
-          pos.y - gun.bulletSize,
+          pos.x + transform.width / 2,
+          pos.y,
+          "ball",
+          EntityStatus.FRIENDLY,
           { x: 0, y: -1 },
-          gun.bulletSize,
           gun.damage,
-          EntityStatus.FRIENDLY
         );
       }
     });

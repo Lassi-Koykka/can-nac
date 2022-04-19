@@ -1,5 +1,6 @@
 import {
   Align,
+  Animations,
   Collider,
   ColliderType,
   Damage,
@@ -16,14 +17,36 @@ import {
 } from "../components";
 import { Component, ECS } from "../ecs";
 
+
+export type bulletType = "ball" | "wave" | "laser"
+const BULLET_TYPES: {[key: string]: Component[]} = {
+  "ball": [
+    new Transform(6, 12, Align.CENTER, Align.CENTER),
+    new Sprite(SpriteType.STATIC, "yellow", {x: 0, y: 85}),
+    new Animations({"default": [{x: 0, y: 85}, {x: 7, y: 85}, {x: 14, y: 85}, {x: 21, y: 85}]})
+
+  ],
+  "wave": [
+    new Transform(12, 4, Align.CENTER, Align.CENTER),
+    new Sprite(SpriteType.STATIC, "yellow", {x: 0, y: 99}),
+    new Animations({"default": [{x: 0, y: 99}, {x: 0, y: 103}]})
+  ],
+  "laser": [
+    new Transform(4, 12, Align.CENTER, Align.CENTER),
+    new Sprite(SpriteType.STATIC, "yellow", {x: 14, y: 99}),
+    new Animations({"default": [{x: 14, y: 99}, {x: 19, y: 99}, {x: 24, y: 99}]})
+  ],
+}
+
 export const spawnBullet = (
   ecs: ECS,
   x: number,
   y: number,
-  dir: { x: number, y: number },
-  bulletSize: number | {width: number, height: number},
-  damage: number,
-  status: EntityStatus
+  bulletType: bulletType,
+  status: EntityStatus = EntityStatus.FRIENDLY,
+  dir: { x: number, y: number } = {x: 0, y: -1},
+  damage: number = 1,
+  speed: number = 160
 ) => {
   const player = ecs.addEntity();
   const components: Component[] = [
@@ -31,13 +54,10 @@ export const spawnBullet = (
     new Status(status),
     new Position(x, y),
     new Damage(damage),
+    new Speed(speed),
     new Collider(ColliderType.RECTANGLE),
-    (typeof bulletSize === "number" 
-      ? new Transform(bulletSize, bulletSize, Align.CENTER, Align.CENTER)
-      : new Transform(bulletSize.width, bulletSize.height, Align.CENTER, Align.CENTER)),
     new Direction(dir.x, dir.y),
-    new Speed(160),
-    new Sprite(SpriteType.STATIC, "yellow", {x: 15, y: 29}),
+    ...BULLET_TYPES[bulletType]
   ];
 
   components.forEach((c) => {
