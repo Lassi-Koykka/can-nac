@@ -16,25 +16,26 @@ import {
   Transform,
 } from "../components";
 import { Component, ECS } from "../ecs";
+import {createAnimation} from "../utils";
 
 
 export type bulletType = "ball" | "wave" | "laser"
 const BULLET_TYPES: {[key: string]: Component[]} = {
   "ball": [
     new Transform(6, 12, Align.CENTER, Align.CENTER),
-    new Sprite(SpriteType.STATIC, "yellow", {x: 0, y: 85}),
-    new Animations({"default": [{x: 0, y: 85}, {x: 7, y: 85}, {x: 14, y: 85}, {x: 21, y: 85}]})
+    new Sprite(SpriteType.SPRITE, "yellow", {x: 0, y: 85}),
+    new Animations({"default": createAnimation([{x: 0, y: 85}, {x: 7, y: 85}, {x: 14, y: 85}, {x: 21, y: 85}])})
 
   ],
   "wave": [
     new Transform(12, 4, Align.CENTER, Align.CENTER),
-    new Sprite(SpriteType.STATIC, "yellow", {x: 0, y: 99}),
-    new Animations({"default": [{x: 0, y: 99}, {x: 0, y: 103}]})
+    new Sprite(SpriteType.SPRITE, "yellow", {x: 0, y: 99}),
+    new Animations({"default": createAnimation([{x: 0, y: 99}, {x: 0, y: 103}])})
   ],
   "laser": [
     new Transform(4, 12, Align.CENTER, Align.CENTER),
-    new Sprite(SpriteType.STATIC, "yellow", {x: 14, y: 99}),
-    new Animations({"default": [{x: 14, y: 99}, {x: 19, y: 99}, {x: 24, y: 99}]})
+    new Sprite(SpriteType.SPRITE, "yellow", {x: 14, y: 99}),
+    new Animations({"default": createAnimation([{x: 14, y: 99}, {x: 19, y: 99}, {x: 24, y: 99}])})
   ],
 }
 
@@ -48,7 +49,7 @@ export const spawnBullet = (
   damage: number = 1,
   speed: number = 160
 ) => {
-  const player = ecs.addEntity();
+  const bullet = ecs.addEntity();
   const components: Component[] = [
     new Tag(EntityTag.PROJECTILE),
     new Status(status),
@@ -61,8 +62,8 @@ export const spawnBullet = (
   ];
 
   components.forEach((c) => {
-    ecs.addComponent(player, c);
+    ecs.addComponent(bullet, c);
   });
 
-  return player;
+  return bullet;
 };

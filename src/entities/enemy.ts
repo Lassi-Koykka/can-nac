@@ -21,31 +21,31 @@ const ENEMY_TYPES: {[key: string]: Component[]} = {
     new Speed(20),
     new Health(3, 3),
     new Transform(28, 28),
-    new Sprite(SpriteType.STATIC, "blue", {x:28, y:56}),
+    new Sprite(SpriteType.SPRITE, "blue", {x:28, y:56}),
   ],
   "small1": [
     new Speed(20),
     new Health(1, 1),
     new Transform(14, 14),
-    new Sprite(SpriteType.STATIC, "blue", {x:0, y:56}),
+    new Sprite(SpriteType.SPRITE, "blue", {x:0, y:56}),
   ],
   "small2": [
     new Speed(20),
     new Health(1, 1),
     new Transform(14, 14),
-    new Sprite(SpriteType.STATIC, "blue", {x:14, y:56}),
+    new Sprite(SpriteType.SPRITE, "blue", {x:14, y:56}),
   ],
   "small3": [
     new Speed(20),
     new Health(1, 1),
     new Transform(14, 14),
-    new Sprite(SpriteType.STATIC, "blue", {x:0, y:70}),
+    new Sprite(SpriteType.SPRITE, "blue", {x:0, y:70}),
   ],
   "small4": [
     new Speed(20),
     new Health(1, 1),
     new Transform(14, 14),
-    new Sprite(SpriteType.STATIC, "blue", {x:14, y:70}),
+    new Sprite(SpriteType.SPRITE, "blue", {x:14, y:70}),
   ]
 }
 

@@ -1,12 +1,11 @@
 import { ECS } from "./ecs";
-import {spawnEnemy} from "./entities/enemy";
 import { spawnPlayer } from "./entities/player";
 import "./style.css";
+import AnimationSystem from "./systems/animationSystem";
 import CollisionSystem from "./systems/collisionSystem";
 import EnemySpawnerSystem from "./systems/enemySpawnerSystem";
 import PlayerInputSystem from "./systems/playerInputSystem";
 import RenderingSystem from "./systems/renderingSystem";
-import {randomInt} from "./utils";
 
 const canvas = document.querySelector<HTMLCanvasElement>("#gameCanvas")!;
 canvas.tabIndex = 1
@@ -34,11 +33,13 @@ const updateKeyMap = (e: KeyboardEvent) => {
 const ecs = new ECS();
 const collisionSystem = new CollisionSystem(canvas);
 const renderingSystem = new RenderingSystem(ctx, canvas.width, canvas.height);
+const animationSystem = new AnimationSystem()
 const playerInputSystem = new PlayerInputSystem();
 const enemySpawnerSystem = new EnemySpawnerSystem(canvas.width, 7)
 ecs.addSystem(playerInputSystem);
 ecs.addSystem(renderingSystem);
 ecs.addSystem(collisionSystem);
+ecs.addSystem(animationSystem);
 ecs.addSystem(enemySpawnerSystem)
 
 const player = spawnPlayer(ecs, canvas.width / 2, canvas.height - 30);

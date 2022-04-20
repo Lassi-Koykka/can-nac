@@ -1,9 +1,9 @@
 import { Component } from "./ecs";
+import {createAnimation} from "./utils";
 
 export enum SpriteType {
   PLACEHOLDER,
-  SPRITE,
-  STATIC
+  SPRITE
 }
 
 export enum Align {
@@ -43,7 +43,9 @@ export interface Gun {
   damage: number;
 }
 
+export type AnimationType = "loop" | "single"
 export type AnimationFrames = {x: number, y: number}[]
+export interface SpriteAnimation { type: AnimationType, frames: AnimationFrames, fps: number }
 
 export class Position extends Component {
   constructor(public x: number, public y: number) {
@@ -122,9 +124,9 @@ export class Sprite extends Component {
 
 export class Animations extends Component {
   constructor(
-    public animations: { [name: string]: AnimationFrames } = {"default": []},
+    public animations: { [name: string]: SpriteAnimation } = { "default": createAnimation()},
     public state = "default",
-    public frame = 0,
+    public currFrame = 0,
     public lastFrameTime = 0
   ){
     super();

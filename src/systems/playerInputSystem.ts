@@ -1,4 +1,5 @@
 import {
+  Animations,
   Direction,
   EntityStatus,
   Guns,
@@ -24,6 +25,7 @@ export default class PlayerInputSystem extends System {
       let dir = comps.get(Direction);
       let pos = comps.get(Position);
       let transform = comps.get(Transform);
+      let animations = comps.get(Animations);
       let {gunList, active} = comps.get(Guns);
 
       // Static movement, no acceleration
@@ -38,6 +40,18 @@ export default class PlayerInputSystem extends System {
       const normVel = normalizeVector({ x: dir.x, y: dir.y });
       dir.x = normVel.x;
       dir.y = normVel.y;
+      
+      if(animations) {
+        if(dir.x < 0) {
+          animations.state = "turning_left"
+        }
+        else if(dir.x > 0) {
+          animations.state = "turning_right"
+        }
+        else {
+          animations.state = "default"
+        } 
+      }
 
       if (keymap[" "] && !keymapLastFrame[" "]) {
         const gun = gunList[active];

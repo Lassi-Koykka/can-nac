@@ -1,4 +1,4 @@
-import {Align, Position, Transform} from "./components";
+import {Align, AnimationFrames, AnimationType, Position, SpriteAnimation, Transform} from "./components";
 
 export const rotateVector = (vecX: number, vecY: number, angle: number) => {
   let dx = vecX * Math.cos(angle) - vecY * Math.sin(angle);
@@ -52,3 +52,5 @@ const removeOffset = (coord: number, size: number, align: Align) => {
       return coord;
   }
 }
+
+export const createAnimation = (frames: AnimationFrames = [], type: AnimationType = "loop", fps: number = 6 ): SpriteAnimation => ({type, frames, fps})
