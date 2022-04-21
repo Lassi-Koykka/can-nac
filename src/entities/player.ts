@@ -16,7 +16,7 @@ import {
   Animations,
 } from "../components";
 import { Component, ECS } from "../ecs";
-import {createAnimation} from "../utils";
+import { createAnimation } from "../utils";
 
 export const spawnPlayer = (ecs: ECS, x: number, y: number) => {
   const player = ecs.addEntity();
@@ -29,10 +29,36 @@ export const spawnPlayer = (ecs: ECS, x: number, y: number) => {
     new Direction(0, -1),
     new Speed(80),
     new Health(3, 3),
-    new Guns([{fireMode: FireMode.SEMIAUTO, fireRate: 120, bulletSize: 6, count: 1, damage: 1}]),
-    new Sprite(SpriteType.SPRITE, "white", {x:0, y:0}),
-    new Animations({"default": createAnimation([{x:0, y:0}]), "turning_right": createAnimation([{x:28, y:0}]), "turning_left": createAnimation([{x:56, y:0}])})
-
+    new Guns([
+      {
+        fireMode: FireMode.AUTO,
+        fireRate: 300,
+        bulletSize: 6,
+        damage: 1,
+        bulletType: "wave",
+        bulletDirections: [
+          {x: 0, y: -1}
+        ]
+      },
+    ]),
+    new Sprite(SpriteType.SPRITE, "white", { x: 0, y: 0 }),
+    new Animations({
+      default: createAnimation([{ x: 0, y: 0 }]),
+      turning_right: createAnimation(
+        [
+          { x: 28, y: 0 },
+          { x: 56, y: 0 },
+        ],
+        "hold",
+      ),
+      turning_left: createAnimation(
+        [
+          { x: 84, y: 0 },
+          { x: 112, y: 0 },
+        ],
+        "hold",
+      ),
+    }),
   ];
 
   components.forEach((c) => {

@@ -2,6 +2,7 @@ import {
   Animations,
   Direction,
   EntityStatus,
+  FireMode,
   Guns,
   InputListener,
   Position,
@@ -26,7 +27,7 @@ export default class PlayerInputSystem extends System {
       let pos = comps.get(Position);
       let transform = comps.get(Transform);
       let animations = comps.get(Animations);
-      let {gunList, active} = comps.get(Guns);
+      let guns = comps.get(Guns);
 
       // Static movement, no acceleration
       if (keyPress("w") || (!keyDown("s") && keyDown("w"))) dir.y = -1;
@@ -40,30 +41,41 @@ export default class PlayerInputSystem extends System {
       const normVel = normalizeVector({ x: dir.x, y: dir.y });
       dir.x = normVel.x;
       dir.y = normVel.y;
-      
-      if(animations) {
-        if(dir.x < 0) {
-          animations.state = "turning_left"
+
+      if (animations) {
+        if (dir.x < 0 && animations.state !== "turning_left") {
+          if (animations.state === "turning_right")
+            animations.setState("default");
+          animations.setState("turning_left");
+        } else if (dir.x > 0 && animations.state !== "turning_right") {
+          if (animations.state === "turning_left")
+            animations.setState("default");
+          animations.setState("turning_right");
+        } else if (dir.x === 0 && animations.state !== "default") {
+          animations.setState("default");
         }
-        else if(dir.x > 0) {
-          animations.state = "turning_right"
-        }
-        else {
-          animations.state = "default"
-        } 
       }
 
-      if (keymap[" "] && !keymapLastFrame[" "]) {
-        const gun = gunList[active];
-        spawnBullet(
-          this.ecs,
-          pos.x + transform.width / 2,
-          pos.y,
-          "ball",
-          EntityStatus.FRIENDLY,
-          { x: 0, y: -1 },
-          gun.damage,
-        );
+      const gun = guns.getActive();
+      if (gun.fireMode === FireMode.SEMIAUTO && keyPress(" ") 
+          || gun.fireMode === FireMode.AUTO && keyDown(" ")) {
+
+        const fireDelay = 60000 / gun.fireRate;
+        const now = new Date().getTime();
+        if (!gun.lastShotTime || now - gun.lastShotTime > fireDelay) {
+          gun.lastShotTime = now;
+          gun.bulletDirections.forEach((dir) => {
+            spawnBullet(
+              this.ecs,
+              EntityStatus.FRIENDLY,
+              pos.x + (transform.width / 2),
+              pos.y - 5,
+              dir,
+              gun.bulletType,
+              gun.damage
+            );
+          });
+        }
       }
     });
   }

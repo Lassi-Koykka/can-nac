@@ -1,4 +1,5 @@
-import { Component } from "./ecs";
+import { Component, ECS } from "./ecs";
+import {bulletType, spawnBullet} from "./entities/bullet";
 import {createAnimation} from "./utils";
 
 export enum SpriteType {
@@ -39,11 +40,13 @@ export interface Gun {
   fireMode: FireMode;
   fireRate: number;
   bulletSize: number;
-  count: number;
   damage: number;
+  bulletType: bulletType
+  bulletDirections: {x: number, y: number}[]
+  lastShotTime?: number
 }
 
-export type AnimationType = "loop" | "single"
+export type AnimationType = "loop" | "single" | "hold"
 export type AnimationFrames = {x: number, y: number}[]
 export interface SpriteAnimation { type: AnimationType, frames: AnimationFrames, fps: number }
 
@@ -131,10 +134,20 @@ export class Animations extends Component {
   ){
     super();
   }
+
+  setState(newState: string) {
+    this.state = this.animations[newState] ? newState : "default"
+    this.currFrame = 0
+    this.lastFrameTime = 0
+  }
 }
 
 export class Guns extends Component {
   constructor(public gunList: Gun[], public active: number = 0 ) {
     super();
+  }
+
+  getActive() {
+    return this.gunList[this.active]
   }
 }

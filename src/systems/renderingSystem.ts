@@ -18,7 +18,7 @@ export default class RenderingSystem extends System {
     this.canvasWidth = canvasWidth
     this.canvasHeight = canvasHeight
     this.spritesheet = new Image()
-    this.spritesheet.src = "spritesheet.png"
+    this.spritesheet.src = "shmup-spritesheet-v2.png"
     this.background = new Image()
     this.background.src = "nebula-background.png"
   }

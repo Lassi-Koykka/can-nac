@@ -24,8 +24,7 @@ const resetKeymap = () => {
 };
 
 const updateKeyMap = (e: KeyboardEvent) => {
-  e.preventDefault()
-  console.log("Keyevent: ", e.key);
+  // e.preventDefault()
   window.keymap[e.key.toLowerCase()] = e.type === "keydown";
 };
 
