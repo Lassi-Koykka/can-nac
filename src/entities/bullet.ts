@@ -1,24 +1,21 @@
 import {
-  Align,
   Animations,
   Collider,
-  ColliderType,
   Damage,
   Direction,
   Status,
   Tag,
-  EntityStatus,
-  EntityTag,
   Position,
   Speed,
   Sprite,
-  SpriteType,
   Transform,
 } from "../components";
 import { Component, ECS } from "../ecs";
+import {Align, ColliderType, EntityStatus, EntityTag, SpriteType} from "../enums";
 import {createAnimation} from "../utils";
+import { bulletType } from "../types";
 
-export type bulletType = "ball" | "wave" | "laser"
+
 const BULLET_TYPES: {[key: string]: Component[]} = {
   "ball": [
     new Transform(6, 12, Align.CENTER, Align.CENTER),
@@ -46,7 +43,7 @@ export const spawnBullet = (
   dir: { x: number, y: number } = {x: 0, y: -1},
   bulletType: bulletType,
   damage: number = 1,
-  speed: number = 160
+  speed: number = 200
 ) => {
   const bullet = ecs.addEntity();
   const components: Component[] = [

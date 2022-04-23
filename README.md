@@ -6,15 +6,15 @@ An ECS driven shoot-em-up game a created using vanilla canvas.
 ### Systems and mechanics
 
 - [x] Enemy spawner system
-- [x] AnimationSystem
-- [ ] Sound
+- [x] Animation System
+- [x] Audio System
 - [ ] Enemy movement patterns
 - [ ] Enemy attacks
 - [ ] Health system
 - [ ] Player damage
 - [ ] Pausing
 - [ ] Score and win conditions
-- [ ] HUD and Menu
+- [ ] HUD, Menu and a Title screen
     - [ ] UI Renderer system
 
 ### Content

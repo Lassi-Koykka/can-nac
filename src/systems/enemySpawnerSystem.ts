@@ -1,6 +1,7 @@
-import {EntityTag, Position, Status, Tag} from "../components";
+import {Position, Status, Tag} from "../components";
 import {Entity, System} from "../ecs";
 import {enemyType, spawnEnemy} from "../entities/enemy";
+import {EntityTag} from "../enums";
 import {randomInt} from "../utils";
 
 export default class EnemySpawnerSystem extends System {

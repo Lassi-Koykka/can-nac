@@ -1,3 +1,4 @@
+import {createAudioManager} from "./audioManager";
 import { ECS } from "./ecs";
 import { spawnPlayer } from "./entities/player";
 import "./style.css";
@@ -6,53 +7,103 @@ import CollisionSystem from "./systems/collisionSystem";
 import EnemySpawnerSystem from "./systems/enemySpawnerSystem";
 import PlayerInputSystem from "./systems/playerInputSystem";
 import RenderingSystem from "./systems/renderingSystem";
+import { loadAudioClips, loadImage } from "./utils";
 
+// --- Canvas ---
 const canvas = document.querySelector<HTMLCanvasElement>("#gameCanvas")!;
-canvas.tabIndex = 1
+canvas.tabIndex = 1;
+
+// --- Context ---
 const ctx = canvas.getContext("2d")!;
 ctx.lineWidth = 2;
 ctx.imageSmoothingEnabled = false;
 
-// Input
-window.keymap = {}
-window.keymapLastFrame = {}
+// --- Audio Context ---
+//@ts-ignore
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-const resetKeymap = () => {
-  console.log("RESETTING")
-  window.keymap = {}
-  window.keymapLastFrame = {}
-};
+// --- Input Setup ---
+globalThis.KEYMAP = {};
+globalThis.KEYMAP_PREV = {};
 
 const updateKeyMap = (e: KeyboardEvent) => {
   // e.preventDefault()
-  window.keymap[e.key.toLowerCase()] = e.type === "keydown";
+  KEYMAP[e.key.toLowerCase()] = e.type === "keydown";
 };
 
+const resetKeymap = () => {
+  KEYMAP = {};
+  KEYMAP_PREV = {};
+};
 
-const ecs = new ECS();
-const collisionSystem = new CollisionSystem(canvas);
-const renderingSystem = new RenderingSystem(ctx, canvas.width, canvas.height);
-const animationSystem = new AnimationSystem()
-const playerInputSystem = new PlayerInputSystem();
-const enemySpawnerSystem = new EnemySpawnerSystem(canvas.width, 7)
-ecs.addSystem(playerInputSystem);
-ecs.addSystem(renderingSystem);
-ecs.addSystem(collisionSystem);
-ecs.addSystem(animationSystem);
-ecs.addSystem(enemySpawnerSystem)
+window.addEventListener("keydown", updateKeyMap);
+window.addEventListener("keyup", updateKeyMap);
+window.addEventListener("blur", () => resetKeymap());
+window.addEventListener("focus", () => resetKeymap());
 
-const player = spawnPlayer(ecs, canvas.width / 2, canvas.height - 30);
 
-const runGame = (ctx: CanvasRenderingContext2D) => {
-  // ANIMATION PROPERTIES
+
+// --------------------------
+// LOAD ASSETS AND START GAME
+// --------------------------
+
+(async () => {
+  // --- PRELOAD ASSETS ---
+  const AUDIOCLIPS = [
+    {
+      name: "laserShot",
+      url:"assets/laserShoot.wav",
+    },
+    {
+      name: "explosion",
+      url: "assets/explosion.wav"
+    },
+    {
+      name: "death",
+      url: "assets/death.wav"
+    },
+    {
+      name: "hitHurt",
+      url: "assets/hitHurt.wav"
+    },
+  ];
+  const [spritesheetImg, backgroundImg, audioClipBuffers] = await Promise.all([
+    loadImage("assets/spritesheet.png"),
+    loadImage("assets/nebula-background.png"),
+    loadAudioClips(audioCtx, AUDIOCLIPS),
+  ]); 
+  
+
+  console.log("AudioClipBuffers", audioClipBuffers)
+  globalThis.AUDIO_MANAGER = createAudioManager(audioCtx, audioClipBuffers, 0.2)
+
+  // --- INITIALIZE ECS ---
+  const ecs = new ECS();
+  globalThis.SYSTEMS = {
+    "collisionSystem": new CollisionSystem(canvas),
+    "renderingSystem": new RenderingSystem(
+      ctx,
+      canvas,
+      { backgroundImg, spritesheetImg },
+    ),
+    "animationSystem": new AnimationSystem(),
+    "inputSystem": new PlayerInputSystem(),
+    "enemySpawnerSystem": new EnemySpawnerSystem(canvas.width, 7),
+  }
+
+  Object.values(SYSTEMS).forEach((sys) => ecs.addSystem(sys));
+
+  spawnPlayer(ecs, canvas.width / 2, canvas.height - 30);
+
+  // --- ANIMATION PROPERTIES ---
   let lastTime = 0;
   const fps = 60;
   const nextFrame = 1000 / fps;
 
-  // START
+  // --- START GAME LOOP ---
+  // @ts-ignore
   let frame = requestAnimationFrame(loop);
 
-  // LOOP
   function loop(t: number) {
     const delta = t - lastTime;
     if (delta > nextFrame) {
@@ -63,16 +114,9 @@ const runGame = (ctx: CanvasRenderingContext2D) => {
       ecs.update(delta * 0.001);
 
       // Set keymap history
-      keymapLastFrame = Object.assign(keymapLastFrame, keymap);
+      KEYMAP_PREV = Object.assign(KEYMAP_PREV, KEYMAP);
     }
     frame = requestAnimationFrame(loop);
   }
-};
 
-// EventListeners
-
-window.addEventListener("blur", () => resetKeymap())
-window.addEventListener("focus", () => resetKeymap())
-window.addEventListener("load", () => runGame(ctx));
-window.addEventListener("keydown", updateKeyMap);
-window.addEventListener("keyup", updateKeyMap);
+})();

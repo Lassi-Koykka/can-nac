@@ -1,8 +1,6 @@
 import {
   Animations,
   Direction,
-  EntityStatus,
-  FireMode,
   Guns,
   InputListener,
   Position,
@@ -10,7 +8,18 @@ import {
 } from "../components";
 import { Entity, System } from "../ecs";
 import { spawnBullet } from "../entities/bullet";
+import {EntityStatus, FireMode} from "../enums";
 import { normalizeVector } from "../utils";
+
+
+const INPUT = {
+  UP: ["w", "arrowup"],
+  DOWN: ["s", "arrowdown"],
+  LEFT: ["a", "arrowleft"],
+  RIGHT: ["d", "arrowright"],
+  ACTION1: [" "]
+}
+
 
 export default class PlayerInputSystem extends System {
   componentsRequired = new Set<Function>([
@@ -30,13 +39,13 @@ export default class PlayerInputSystem extends System {
       let guns = comps.get(Guns);
 
       // Static movement, no acceleration
-      if (keyPress("w") || (!keyDown("s") && keyDown("w"))) dir.y = -1;
-      if (keyPress("s") || (!keyDown("w") && keyDown("s"))) dir.y = 1;
-      if (!keyDown("w") && !keyDown("s")) dir.y = 0;
+      if (keyPress("UP") || (!keyDown("DOWN") && keyDown("UP"))) dir.y = -1;
+      if (keyPress("DOWN") || (!keyDown("UP") && keyDown("DOWN"))) dir.y = 1;
+      if (!keyDown("UP") && !keyDown("DOWN")) dir.y = 0;
 
-      if (keyPress("a") || (!keyDown("d") && keyDown("a"))) dir.x = -1;
-      if (keyPress("d") || (!keyDown("a") && keyDown("d"))) dir.x = 1;
-      if (!keyDown("a") && !keyDown("d")) dir.x = 0;
+      if (keyPress("LEFT") || (!keyDown("RIGHT") && keyDown("LEFT"))) dir.x = -1;
+      if (keyPress("RIGHT") || (!keyDown("LEFT") && keyDown("RIGHT"))) dir.x = 1;
+      if (!keyDown("LEFT") && !keyDown("RIGHT")) dir.x = 0;
 
       const normVel = normalizeVector({ x: dir.x, y: dir.y });
       dir.x = normVel.x;
@@ -57,12 +66,12 @@ export default class PlayerInputSystem extends System {
       }
 
       const gun = guns.getActive();
-      if (gun.fireMode === FireMode.SEMIAUTO && keyPress(" ") 
-          || gun.fireMode === FireMode.AUTO && keyDown(" ")) {
-
+      if (gun.fireMode === FireMode.SEMIAUTO && keyPress("ACTION1") 
+          || gun.fireMode === FireMode.AUTO && keyDown("ACTION1")) {
         const fireDelay = 60000 / gun.fireRate;
         const now = new Date().getTime();
         if (!gun.lastShotTime || now - gun.lastShotTime > fireDelay) {
+          AUDIO_MANAGER.playClip("laserShot")
           gun.lastShotTime = now;
           gun.bulletDirections.forEach((dir) => {
             spawnBullet(
@@ -81,8 +90,8 @@ export default class PlayerInputSystem extends System {
   }
 }
 
-const keyDown = (key: string) => window.keymap[key];
-const keyPress = (key: string) =>
-  window.keymap[key] && !window.keymapLastFrame[key];
-const keyUp = (key: string) =>
-  !window.keymap[key] && window.keymapLastFrame[key];
+const keyDown = (input: keyof typeof INPUT) => INPUT[input].some(key => KEYMAP[key]);
+const keyPress = (input: keyof typeof INPUT) =>
+  INPUT[input].some(key => KEYMAP[key]) && INPUT[input].every(key => !KEYMAP_PREV[key]);
+const keyUp = (input: keyof typeof INPUT) =>
+  INPUT[input].some(key => !KEYMAP[key]) && INPUT[input].every(key => KEYMAP_PREV[key]);

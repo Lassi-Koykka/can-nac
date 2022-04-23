@@ -1,5 +1,32 @@
-import {Align, AnimationFrames, AnimationType, Position, SpriteAnimation, Transform} from "./components";
+import { BufferLoader } from "./bufferloader";
+import { Position, Transform } from "./components";
+import { Align } from "./enums";
+import { AnimationFrames, AnimationType, SpriteAnimation } from "./types";
 
+// Assets
+export const loadImage = (src: string): Promise<HTMLImageElement> =>
+  new Promise((resolve, reject) => {
+    let img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = src;
+  });
+
+export const loadAudioClips = (
+  ctx: AudioContext,
+  clips: { name: string, url: string }[]
+): Promise<{[name: string]: AudioBuffer}> =>
+  new Promise((resolve) =>
+    new BufferLoader(ctx, clips.map(clip => clip.url), (buffers: AudioBuffer[]) => {
+        const clipsEntries = buffers.map(( buf, i ) => [clips[i].name, buf])
+        const clipBuffers = Object.fromEntries(clipsEntries)
+        
+        resolve(clipBuffers)
+      }
+    ).load()
+  );
+
+// Math
 export const rotateVector = (vecX: number, vecY: number, angle: number) => {
   let dx = vecX * Math.cos(angle) - vecY * Math.sin(angle);
   let dy = vecX * Math.sin(angle) + vecY * Math.cos(angle);
@@ -7,37 +34,51 @@ export const rotateVector = (vecX: number, vecY: number, angle: number) => {
   return { x: dx, y: dy };
 };
 
-export const normalizeVector = (vec: { x: number, y: number}) => {
-    if(vec.x === 0 && vec.y === 0) return vec;
-    let mag = Math.sqrt(vec.x ** 2 + vec.y ** 2 )
-    return {
-      x: vec.x / mag,
-      y: vec.y / mag,
-    }
-}
+export const normalizeVector = (vec: { x: number; y: number }) => {
+  if (vec.x === 0 && vec.y === 0) return vec;
+  let mag = Math.sqrt(vec.x ** 2 + vec.y ** 2);
+  return {
+    x: vec.x / mag,
+    y: vec.y / mag,
+  };
+};
 
-export const randomInt = (min: number = 0, max: number, wholeNum: boolean = true): number => {
-    return wholeNum ? Math.floor(Math.random() * (max - min + 1)) + min : Math.random() * (max - min + 1) + min
-}
+export const randomInt = (
+  min: number = 0,
+  max: number,
+  wholeNum: boolean = true
+): number => {
+  return wholeNum
+    ? Math.floor(Math.random() * (max - min + 1)) + min
+    : Math.random() * (max - min + 1) + min;
+};
 
-export const getDistance = (x1: number, y1: number, x2: number, y2: number) =>  {
+export const getDistance = (x1: number, y1: number, x2: number, y2: number) => {
   return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
-}
+};
 
-export const scale = (number: number, inMin: number, inMax: number, outMin: number, outMax: number) => {
-    return (number - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
-}
+export const scale = (
+  number: number,
+  inMin: number,
+  inMax: number,
+  outMin: number,
+  outMax: number
+) => {
+  return ((number - inMin) * (outMax - outMin)) / (inMax - inMin) + outMin;
+};
 
 export const toRadians = (deg: number) => {
   return (deg * Math.PI) / 180;
-}
+};
 
-export const getOrigin = ({x, y}: Position, {width, height, horizontalAlign, verticalAlign}: Transform) => {
+export const getOrigin = (
+  { x, y }: Position,
+  { width, height, horizontalAlign, verticalAlign }: Transform
+) => {
   return {
     x: removeOffset(x, width, horizontalAlign),
-    y: removeOffset(y, height, verticalAlign)
-  }
-  
+    y: removeOffset(y, height, verticalAlign),
+  };
 };
 
 const removeOffset = (coord: number, size: number, align: Align) => {
@@ -51,6 +92,11 @@ const removeOffset = (coord: number, size: number, align: Align) => {
     default:
       return coord;
   }
-}
+};
 
-export const createAnimation = (frames: AnimationFrames = [], type: AnimationType = "loop", fps: number = 6 ): SpriteAnimation => ({type, frames, fps})
+// Misc
+export const createAnimation = (
+  frames: AnimationFrames = [],
+  type: AnimationType = "loop",
+  fps: number = 6
+): SpriteAnimation => ({ type, frames, fps });

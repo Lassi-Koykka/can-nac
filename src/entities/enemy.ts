@@ -3,17 +3,14 @@ import {
   Position,
   Sprite,
   Direction,
-  SpriteType,
   Transform,
   Speed,
   Collider,
-  ColliderType,
   Status,
   Tag,
-  EntityTag,
-  EntityStatus,
 } from "../components";
 import { Component, ECS } from "../ecs";
+import {ColliderType, EntityStatus, EntityTag, SpriteType} from "../enums";
 
 export type enemyType = "large1" | "small1" | "small2" | "small3" | "small4"
 const ENEMY_TYPES: {[key: string]: Component[]} = {

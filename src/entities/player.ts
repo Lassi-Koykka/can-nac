@@ -3,20 +3,17 @@ import {
   Position,
   Sprite,
   Direction,
-  SpriteType,
   Transform,
   InputListener,
   Speed,
   Guns,
-  FireMode,
   Collider,
-  ColliderType,
   Tag,
-  EntityTag,
   Animations,
 } from "../components";
 import { Component, ECS } from "../ecs";
-import { createAnimation } from "../utils";
+import {ColliderType, EntityTag, FireMode, SpriteType} from "../enums";
+import { createAnimation, rotateVector } from "../utils";
 
 export const spawnPlayer = (ecs: ECS, x: number, y: number) => {
   const player = ecs.addEntity();
@@ -27,7 +24,7 @@ export const spawnPlayer = (ecs: ECS, x: number, y: number) => {
     new Transform(28, 28),
     new Collider(ColliderType.RECTANGLE),
     new Direction(0, -1),
-    new Speed(80),
+    new Speed(120),
     new Health(3, 3),
     new Guns([
       {
@@ -35,9 +32,13 @@ export const spawnPlayer = (ecs: ECS, x: number, y: number) => {
         fireRate: 300,
         bulletSize: 6,
         damage: 1,
-        bulletType: "wave",
+        bulletType: "ball",
         bulletDirections: [
-          {x: 0, y: -1}
+          {x: 0, y: -1},
+          // {x: -1, y: 0},
+          // {x: 1, y: 0},
+          rotateVector(0, -1, 45),
+          rotateVector(0, -1, -45)
         ]
       },
     ]),

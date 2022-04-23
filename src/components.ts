@@ -1,54 +1,7 @@
-import { Component, ECS } from "./ecs";
-import {bulletType, spawnBullet} from "./entities/bullet";
+import { Component } from "./ecs";
+import {Align, ColliderType, EntityStatus, EntityTag, SpriteType} from "./enums";
+import {AudioClip, Gun, SpriteAnimation} from "./types";
 import {createAnimation} from "./utils";
-
-export enum SpriteType {
-  PLACEHOLDER,
-  SPRITE
-}
-
-export enum Align {
-  START,
-  CENTER,
-  END,
-}
-
-export enum EntityTag {
-  PLAYER,
-  PROJECTILE,
-  ENEMY,
-}
-
-export enum EntityStatus {
-  FRIENDLY,
-  NEUTRAL,
-  ENEMY,
-}
-
-export enum ColliderType {
-  RECTANGLE,
-  CIRCLE,
-}
-
-export enum FireMode {
-  SEMIAUTO,
-  AUTO,
-  BURST,
-}
-
-export interface Gun {
-  fireMode: FireMode;
-  fireRate: number;
-  bulletSize: number;
-  damage: number;
-  bulletType: bulletType
-  bulletDirections: {x: number, y: number}[]
-  lastShotTime?: number
-}
-
-export type AnimationType = "loop" | "single" | "hold"
-export type AnimationFrames = {x: number, y: number}[]
-export interface SpriteAnimation { type: AnimationType, frames: AnimationFrames, fps: number }
 
 export class Position extends Component {
   constructor(public x: number, public y: number) {
@@ -126,11 +79,11 @@ export class Sprite extends Component {
 }
 
 export class Animations extends Component {
+  public currFrame: number = 0
+  public lastFrameTime: number = 0
   constructor(
     public animations: { [name: string]: SpriteAnimation } = { "default": createAnimation()},
     public state = "default",
-    public currFrame = 0,
-    public lastFrameTime = 0
   ){
     super();
   }

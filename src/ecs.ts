@@ -4,6 +4,7 @@ export abstract class System {
     public abstract componentsRequired: Set<Function>
     public abstract update(entities: Set<Entity>, delta: number): void
     public ecs: ECS
+    public enabled: boolean = true
 }
 export type ComponentClass<T extends Component> = new (...args: any[]) => T
 export class ComponentContainer {
@@ -90,7 +91,7 @@ export class ECS {
     }
     public update(delta: number): void {
         for (let [system, entities] of this.systems.entries()) {
-            system.update(entities, delta)
+            system.enabled && system.update(entities, delta)
         }
         while (this.entitiesToDestroy.length > 0) {
             this.destroyEntity(this.entitiesToDestroy.pop()!);

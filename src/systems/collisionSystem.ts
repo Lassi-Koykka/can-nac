@@ -1,8 +1,6 @@
 import {
   Collider,
   Direction,
-  EntityStatus,
-  EntityTag,
   Health,
   Position,
   Speed,
@@ -11,6 +9,7 @@ import {
   Transform,
 } from "../components";
 import { Entity, System } from "../ecs";
+import {EntityStatus, EntityTag} from "../enums";
 import { getOrigin } from "../utils";
 
 export default class CollisionSystem extends System {
@@ -66,7 +65,7 @@ export default class CollisionSystem extends System {
       if (tag === EntityTag.ENEMY) {
         if (newPosY > height) {
           this.ecs.removeEntity(entity);
-          console.log("Removing enemy");
+          // console.log("Removing enemy");
         }
       }
 
@@ -79,8 +78,11 @@ export default class CollisionSystem extends System {
               : EntityTag.PLAYER)
         );
         if (isOOB(newPosX, newPosY, width, height, 10) || target) {
-          if (target) this.ecs.removeEntity(target.entity);
-          console.log("Removing bullet");
+          if (target) {
+            this.ecs.removeEntity(target.entity);
+            AUDIO_MANAGER.playClip("explosion")
+          }
+          // console.log("Removing bullet");
           this.ecs.removeEntity(entity);
         }
       }
