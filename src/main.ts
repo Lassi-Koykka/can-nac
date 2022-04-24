@@ -94,8 +94,6 @@ window.addEventListener("focus", () => resetKeymap());
     }),
   };
 
-  console.log(Object.keys(SYSTEMS))
-
   Object.values(SYSTEMS).forEach((sys) => ecs.addSystem(sys));
 
   spawnPlayer(ecs, canvas.width / 2, canvas.height - 30);
