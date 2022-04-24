@@ -3,16 +3,22 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
-  color: #2c3e50;
   margin-top: 60px;
+  color: #2c3e50;
+}
+
+html {
+  background-color: #272727;
 }
 
 canvas {
-  width: 1024px;
-  height: 640px;
+  transform: translateY(100%) scale(3) ;
+  /* width: 1024px; */
+  /* height: 640px; */
   margin: auto;
   display: block;
   background-color: #000;
   image-rendering: pixelated;
-  /* image-rendering: crisp-edges; */
+  font-smooth: never;
+  -webkit-font-smoothing: none;
 }

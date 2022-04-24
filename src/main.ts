@@ -1,10 +1,11 @@
-import {createAudioManager} from "./audioManager";
+import { createAudioManager } from "./audioManager";
 import { ECS } from "./ecs";
 import { spawnPlayer } from "./entities/player";
 import "./style.css";
 import AnimationSystem from "./systems/animationSystem";
 import CollisionSystem from "./systems/collisionSystem";
 import EnemySpawnerSystem from "./systems/enemySpawnerSystem";
+import PatternMovementSystem from "./systems/patternMovementSystem";
 import PlayerInputSystem from "./systems/playerInputSystem";
 import RenderingSystem from "./systems/renderingSystem";
 import { loadAudioClips, loadImage } from "./utils";
@@ -17,7 +18,7 @@ canvas.tabIndex = 1;
 const ctx = canvas.getContext("2d")!;
 ctx.lineWidth = 2;
 ctx.imageSmoothingEnabled = false;
-ctx.font = "8px 'Press Start 2P'"
+ctx.font = "8px 'Press Start 2P'";
 
 // --- Audio Context ---
 //@ts-ignore
@@ -42,8 +43,6 @@ window.addEventListener("keyup", updateKeyMap);
 window.addEventListener("blur", () => resetKeymap());
 window.addEventListener("focus", () => resetKeymap());
 
-
-
 // --------------------------
 // LOAD ASSETS AND START GAME
 // --------------------------
@@ -53,44 +52,49 @@ window.addEventListener("focus", () => resetKeymap());
   const AUDIOCLIPS = [
     {
       name: "laserShot",
-      url:"assets/laserShoot.wav",
+      url: "assets/laserShoot.wav",
     },
     {
       name: "explosion",
-      url: "assets/explosion.wav"
+      url: "assets/explosion.wav",
     },
     {
       name: "death",
-      url: "assets/death.wav"
+      url: "assets/death.wav",
     },
     {
       name: "hitHurt",
-      url: "assets/hitHurt.wav"
+      url: "assets/hitHurt.wav",
     },
   ];
   const [spritesheetImg, backgroundImg, audioClipBuffers] = await Promise.all([
     loadImage("assets/spritesheet.png"),
     loadImage("assets/nebula-background.png"),
     loadAudioClips(audioCtx, AUDIOCLIPS),
-  ]); 
-  
+  ]);
 
-  console.log("AudioClipBuffers", audioClipBuffers)
-  globalThis.AUDIO_MANAGER = createAudioManager(audioCtx, audioClipBuffers, 0.2)
+  console.log("AudioClipBuffers", audioClipBuffers);
+  globalThis.AUDIO_MANAGER = createAudioManager(
+    audioCtx,
+    audioClipBuffers,
+    0.2
+  );
 
   // --- INITIALIZE ECS ---
   const ecs = new ECS();
   globalThis.SYSTEMS = {
-    "collisionSystem": new CollisionSystem(canvas),
-    "renderingSystem": new RenderingSystem(
-      ctx,
-      canvas,
-      { backgroundImg, spritesheetImg },
-    ),
-    "animationSystem": new AnimationSystem(),
-    "inputSystem": new PlayerInputSystem(),
-    "enemySpawnerSystem": new EnemySpawnerSystem(canvas.width, 7),
-  }
+    inputSystem: new PlayerInputSystem(),
+    movementPatternSystem: new PatternMovementSystem(),
+    collisionSystem: new CollisionSystem(canvas),
+    enemySpawnerSystem: new EnemySpawnerSystem(canvas.width, 7),
+    animationSystem: new AnimationSystem(),
+    renderingSystem: new RenderingSystem(ctx, canvas, {
+      backgroundImg,
+      spritesheetImg,
+    }),
+  };
+
+  console.log(Object.keys(SYSTEMS))
 
   Object.values(SYSTEMS).forEach((sys) => ecs.addSystem(sys));
 
@@ -98,26 +102,25 @@ window.addEventListener("focus", () => resetKeymap());
 
   // --- ANIMATION PROPERTIES ---
   let lastTime = 0;
-  const fps = 60;
-  const nextFrame = 1000 / fps;
+  const maxFps = 72;
+  const nextFrame = 1000 / maxFps;
 
   // --- START GAME LOOP ---
-  // @ts-ignore
-  let frame = requestAnimationFrame(loop);
+  
 
+  requestAnimationFrame(loop);
   function loop(t: number) {
+    requestAnimationFrame(loop);
     const delta = t - lastTime;
-    if (delta >= nextFrame) {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      lastTime = t;
+    if(delta <= nextFrame) return
 
-      // Run systems
-      ecs.update(delta * 0.001);
+    lastTime = t;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Set keymap history
-      KEYMAP_PREV = Object.assign(KEYMAP_PREV, KEYMAP);
-    }
-    frame = requestAnimationFrame(loop);
+    // Run systems
+    ecs.update(delta/1000);
+
+    // Set keymap history
+    KEYMAP_PREV = Object.assign(KEYMAP_PREV, KEYMAP);
   }
-
 })();

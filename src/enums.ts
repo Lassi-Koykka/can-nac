@@ -31,3 +31,8 @@ export enum FireMode {
   AUTO,
   BURST,
 }
+
+export enum MovementPatternType {
+  SINE_VERTICAL,
+  SINE_HORIZONTAL
+}

@@ -3,6 +3,9 @@ An ECS driven shoot-em-up game a created using vanilla canvas.
 
 ## TODO
 
+### Bugfixes
+- [ ] Font on chromium based browsers
+
 ### Systems and mechanics
 
 - [x] Enemy spawner system

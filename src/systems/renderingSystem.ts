@@ -4,14 +4,19 @@ import { SpriteType } from "../enums";
 import { getOrigin } from "../utils";
 
 export default class RenderingSystem extends System {
+  componentsRequired = new Set<Function>([Position, Sprite]);
+
+  // PROPERTIES
   ctx: CanvasRenderingContext2D;
   canvasWidth: number;
   canvasHeight: number;
-  componentsRequired = new Set<Function>([Position, Sprite]);
+
+  // Assets
   spritesheet: HTMLImageElement;
   background: HTMLImageElement;
+
   backgroundYOffset = 0;
-  backgroundMoveSpeed = 3;
+  backgroundMoveSpeed = 250;
 
   constructor(
     ctx: CanvasRenderingContext2D,
@@ -26,13 +31,13 @@ export default class RenderingSystem extends System {
     this.background = assets.backgroundImg
   }
 
-  drawBackground() {
+  drawBackground(delta: number) {
     const ctx = this.ctx;
 
     const backgroundY =
-      this.background.naturalHeight -
+      Math.round(this.background.naturalHeight -
       this.canvasHeight -
-      this.backgroundYOffset;
+      this.backgroundYOffset);
     if (backgroundY < 0) {
       ctx.drawImage(
         this.background,
@@ -57,7 +62,7 @@ export default class RenderingSystem extends System {
       this.canvasWidth,
       this.canvasHeight
     );
-    this.backgroundYOffset += this.backgroundMoveSpeed;
+    this.backgroundYOffset += this.backgroundMoveSpeed * delta;
 
     if (backgroundY <= -this.canvasHeight) {
       this.backgroundYOffset = 2;
@@ -104,14 +109,15 @@ export default class RenderingSystem extends System {
     const ctx = this.ctx;
     ctx.fillStyle = "white";
     ctx.textAlign = "right"
-    ctx.fillText("FPS:" + Math.round(1 / delta), this.canvasWidth - 2, 10)
+    ctx.textBaseline = "top"
+    ctx.fillText("FPS:" + Math.round(1 / delta), this.canvasWidth - 2, 2)
   }
 
   public update(entities: Set<Entity>, delta: number): void {
     // DRAW MENU IF GAMESTATE IS NOT RUNNING
 
     // DRAW BACKGROUND
-    this.drawBackground();
+    this.drawBackground(delta);
 
     // DRAW ENTITIES
     this.drawEntities(entities);

@@ -1,5 +1,5 @@
 import { Component } from "./ecs";
-import {Align, ColliderType, EntityStatus, EntityTag, SpriteType} from "./enums";
+import {Align, ColliderType, EntityStatus, EntityTag, MovementPatternType, SpriteType} from "./enums";
 import {AudioClip, Gun, SpriteAnimation} from "./types";
 import {createAnimation} from "./utils";
 
@@ -11,6 +11,17 @@ export class Position extends Component {
 
 export class Direction extends Component {
   constructor(public x: number, public y: number) {
+    super();
+  }
+}
+
+export class Transform extends Component {
+  constructor(
+    public width: number,
+    public height: number,
+    public horizontalAlign: Align = Align.START,
+    public verticalAlign: Align = Align.START
+  ) {
     super();
   }
 }
@@ -27,6 +38,12 @@ export class Collider extends Component {
   }
 }
 
+export class MovementPattern extends Component {
+  constructor(public type: MovementPatternType) {
+    super();
+  }
+}
+
 export class Health extends Component {
   constructor(public max: number, public curr: number) {
     super();
@@ -39,16 +56,6 @@ export class Damage extends Component {
   }
 }
 
-export class Transform extends Component {
-  constructor(
-    public width: number,
-    public height: number,
-    public horizontalAlign: Align = Align.START,
-    public verticalAlign: Align = Align.START
-  ) {
-    super();
-  }
-}
 
 export class InputListener extends Component {
   constructor() {

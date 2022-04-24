@@ -8,9 +8,10 @@ import {
   Collider,
   Status,
   Tag,
+  MovementPattern,
 } from "../components";
 import { Component, ECS } from "../ecs";
-import {ColliderType, EntityStatus, EntityTag, SpriteType} from "../enums";
+import {ColliderType, EntityStatus, EntityTag, MovementPatternType, SpriteType} from "../enums";
 
 export type enemyType = "large1" | "small1" | "small2" | "small3" | "small4"
 const ENEMY_TYPES: {[key: string]: Component[]} = {
@@ -21,7 +22,7 @@ const ENEMY_TYPES: {[key: string]: Component[]} = {
     new Sprite(SpriteType.SPRITE, "blue", {x:28, y:56}),
   ],
   "small1": [
-    new Speed(20),
+    new Speed(120),
     new Health(1, 1),
     new Transform(14, 14),
     new Sprite(SpriteType.SPRITE, "blue", {x:0, y:56}),
@@ -33,10 +34,11 @@ const ENEMY_TYPES: {[key: string]: Component[]} = {
     new Sprite(SpriteType.SPRITE, "blue", {x:14, y:56}),
   ],
   "small3": [
-    new Speed(20),
+    new Speed(75),
     new Health(1, 1),
     new Transform(14, 14),
     new Sprite(SpriteType.SPRITE, "blue", {x:0, y:70}),
+    new MovementPattern(MovementPatternType.SINE_HORIZONTAL)
   ],
   "small4": [
     new Speed(20),
