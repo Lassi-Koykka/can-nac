@@ -100,7 +100,14 @@ export default class RenderingSystem extends System {
     });
   }
 
-  public update(entities: Set<Entity>, _: number): void {
+  drawFPS(delta: number) {
+    const ctx = this.ctx;
+    ctx.fillStyle = "white";
+    ctx.textAlign = "right"
+    ctx.fillText("FPS:" + Math.round(1 / delta), this.canvasWidth - 2, 10)
+  }
+
+  public update(entities: Set<Entity>, delta: number): void {
     // DRAW MENU IF GAMESTATE IS NOT RUNNING
 
     // DRAW BACKGROUND
@@ -110,5 +117,6 @@ export default class RenderingSystem extends System {
     this.drawEntities(entities);
 
     // DRAW HUD
+    this.drawFPS(delta)
   }
 }

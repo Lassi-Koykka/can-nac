@@ -17,6 +17,7 @@ canvas.tabIndex = 1;
 const ctx = canvas.getContext("2d")!;
 ctx.lineWidth = 2;
 ctx.imageSmoothingEnabled = false;
+ctx.font = "8px 'Press Start 2P'"
 
 // --- Audio Context ---
 //@ts-ignore
@@ -106,7 +107,7 @@ window.addEventListener("focus", () => resetKeymap());
 
   function loop(t: number) {
     const delta = t - lastTime;
-    if (delta > nextFrame) {
+    if (delta >= nextFrame) {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       lastTime = t;
 
