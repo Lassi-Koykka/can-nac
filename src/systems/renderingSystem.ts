@@ -1,7 +1,21 @@
 import { Position, Sprite, Transform } from "../components";
 import { Entity, System } from "../ecs";
-import { SpriteType } from "../enums";
+import { Align, SpriteType } from "../enums";
+import { IFont } from "../types";
 import { getOrigin } from "../utils";
+
+interface IDrawTextOptions<T = undefined> {
+  font?: IFont;
+  horizontalAlign?: Align;
+  verticalAlign?: Align;
+  scale?: number;
+  color?: string;
+  shadow?: {
+    color: string;
+    offsetX: number;
+    offsetY: number;
+  };
+}
 
 export default class RenderingSystem extends System {
   componentsRequired = new Set<Function>([Position, Sprite]);
@@ -14,6 +28,7 @@ export default class RenderingSystem extends System {
   // Assets
   spritesheet: HTMLImageElement;
   background: HTMLImageElement;
+  fonts: { [name: string]: IFont };
 
   backgroundYOffset = 0;
   backgroundMoveSpeed = 250;
@@ -21,23 +36,27 @@ export default class RenderingSystem extends System {
   constructor(
     ctx: CanvasRenderingContext2D,
     canvas: HTMLCanvasElement,
-    assets: { spritesheetImg: HTMLImageElement; backgroundImg: HTMLImageElement },
+    assets: {
+      spritesheetImg: HTMLImageElement;
+      backgroundImg: HTMLImageElement;
+    },
+    fonts: { [name: string]: IFont }
   ) {
     super();
     this.ctx = ctx;
     this.canvasWidth = canvas.width;
     this.canvasHeight = canvas.height;
-    this.spritesheet = assets.spritesheetImg
-    this.background = assets.backgroundImg
+    this.spritesheet = assets.spritesheetImg;
+    this.background = assets.backgroundImg;
+    this.fonts = fonts;
   }
 
   drawBackground(delta: number) {
     const ctx = this.ctx;
 
-    const backgroundY =
-      Math.round(this.background.naturalHeight -
-      this.canvasHeight -
-      this.backgroundYOffset);
+    const backgroundY = Math.round(
+      this.background.naturalHeight - this.canvasHeight - this.backgroundYOffset
+    );
     if (backgroundY < 0) {
       ctx.drawImage(
         this.background,
@@ -92,6 +111,7 @@ export default class RenderingSystem extends System {
           transform.height
         );
       } else {
+        ctx.save();
         ctx.strokeStyle = sprite.style;
         ctx.fillStyle = sprite.style;
         ctx.beginPath();
@@ -101,16 +121,83 @@ export default class RenderingSystem extends System {
           transform.width,
           transform.height
         );
+        ctx.restore();
       }
     });
   }
 
-  drawFPS(delta: number) {
+  drawText(
+    text: string,
+    x: number,
+    y: number,
+    options: IDrawTextOptions<typeof this.fonts>
+  ) {
     const ctx = this.ctx;
-    ctx.fillStyle = "white";
-    ctx.textAlign = "right"
-    ctx.textBaseline = "top"
-    ctx.fillText("FPS:" + Math.round(1 / delta), this.canvasWidth - 2, 2)
+    const {
+      font = this.fonts["default"],
+      verticalAlign = Align.END,
+      horizontalAlign = Align.START,
+      scale = 1,
+      color = "white",
+      shadow,
+    } = options;
+
+    let textWidth = text.length * font.charWidth;
+    let textHeight = font.charHeight;
+    if (shadow) {
+      textWidth += Math.abs(shadow.offsetX);
+      textHeight += Math.abs(shadow.offsetY);
+    }
+
+    const chars = Array.from(font.caseSensitive ? text : text.toLowerCase());
+    const { x: originX, y: originY } = getOrigin(
+      { x, y },
+      { width: textWidth, height: textHeight, horizontalAlign, verticalAlign }
+    );
+
+    ctx.save();
+    chars.forEach((c, i) => {
+      let charIndex = font.characterIndexes[c];
+      console.log(font.characterIndexes)
+      if (c === " " || charIndex === undefined) return;
+
+      if (shadow) {
+        (ctx.shadowColor = shadow.color), (ctx.shadowOffsetX = shadow.offsetX);
+        ctx.shadowOffsetY = shadow.offsetY;
+      }
+      const cols = Math.floor(font.img.naturalWidth / font.charWidth);
+      const charX = (charIndex % cols) * font.charWidth;
+      const charY =
+        Math.floor((charIndex * font.charWidth) / font.img.naturalWidth) *
+        font.charHeight;
+
+      ctx.drawImage(
+        font.img,
+        charX,
+        charY,
+        font.charWidth,
+        font.charHeight,
+        originX + font.charWidth * i,
+        originY,
+        font.charWidth * scale,
+        font.charHeight * scale
+      );
+    });
+    ctx.restore();
+  }
+
+  drawFPS(delta: number) {
+    this.drawText("FPS:" + Math.round(1 / delta), 
+                  this.canvasWidth, 0, {
+      horizontalAlign: Align.END,
+      verticalAlign: Align.START,
+      color: "red",
+      // shadow: {
+      //   color: "red",
+      //   offsetX: 1,
+      //   offsetY: 1,
+      // },
+    });
   }
 
   public update(entities: Set<Entity>, delta: number): void {
@@ -123,6 +210,6 @@ export default class RenderingSystem extends System {
     this.drawEntities(entities);
 
     // DRAW HUD
-    this.drawFPS(delta)
+    this.drawFPS(delta);
   }
 }

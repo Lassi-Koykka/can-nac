@@ -45,10 +45,10 @@ export interface AudioClip {
   playing: boolean;
 }
 
-interface IAudioClipBuffers {
+export interface IAudioClipBuffers {
   [key: string]: AudioBuffer;
 }
-interface IAudioManager {
+export interface IAudioManager {
   audioCtx: AudioContext;
   buffers: IAudioClipBuffers;
   playClip: (
@@ -61,4 +61,12 @@ interface IAudioManager {
       loop?: boolean;
     }
   ) => void;
+}
+
+export interface IFont {
+  img: HTMLImageElement;
+  characterIndexes: { [key: string]: number };
+  charWidth: number,
+  charHeight: number;
+  caseSensitive: boolean;
 }

@@ -89,7 +89,7 @@ export class Animations extends Component {
   public currFrame: number = 0
   public lastFrameTime: number = 0
   constructor(
-    public animations: { [name: string]: SpriteAnimation } = { "default": createAnimation()},
+    public animations: {"default": SpriteAnimation} & { [name: string]: SpriteAnimation } = { "default": createAnimation()},
     public state = "default",
   ){
     super();

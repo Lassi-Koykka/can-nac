@@ -14,14 +14,17 @@ export const loadImage = (src: string): Promise<HTMLImageElement> =>
 
 export const loadAudioClips = (
   ctx: AudioContext,
-  clips: { name: string, url: string }[]
-): Promise<{[name: string]: AudioBuffer}> =>
+  clips: { name: string; url: string }[]
+): Promise<{ [name: string]: AudioBuffer }> =>
   new Promise((resolve) =>
-    new BufferLoader(ctx, clips.map(clip => clip.url), (buffers: AudioBuffer[]) => {
-        const clipsEntries = buffers.map(( buf, i ) => [clips[i].name, buf])
-        const clipBuffers = Object.fromEntries(clipsEntries)
-        
-        resolve(clipBuffers)
+    new BufferLoader(
+      ctx,
+      clips.map((clip) => clip.url),
+      (buffers: AudioBuffer[]) => {
+        const clipsEntries = buffers.map((buf, i) => [clips[i].name, buf]);
+        const clipBuffers = Object.fromEntries(clipsEntries);
+
+        resolve(clipBuffers);
       }
     ).load()
   );
@@ -100,3 +103,12 @@ export const createAnimation = (
   type: AnimationType = "loop",
   fps: number = 6
 ): SpriteAnimation => ({ type, frames, fps });
+
+export const indexChars = (str: string) => {
+  let charIndexes: { [char: string]: number } = {};
+  const chars = Array.from(str);
+  for (let i = 0; i < chars.length; i++) {
+    charIndexes = { ...charIndexes, [chars[i]]: i };
+  }
+  return charIndexes;
+};

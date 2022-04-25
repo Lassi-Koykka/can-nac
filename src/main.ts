@@ -8,7 +8,8 @@ import EnemySpawnerSystem from "./systems/enemySpawnerSystem";
 import PatternMovementSystem from "./systems/patternMovementSystem";
 import PlayerInputSystem from "./systems/playerInputSystem";
 import RenderingSystem from "./systems/renderingSystem";
-import { loadAudioClips, loadImage } from "./utils";
+import {IFont} from "./types";
+import { indexChars, loadAudioClips, loadImage } from "./utils";
 
 // --- Canvas ---
 const canvas = document.querySelector<HTMLCanvasElement>("#gameCanvas")!;
@@ -67,18 +68,28 @@ window.addEventListener("focus", () => resetKeymap());
       url: "assets/hitHurt.wav",
     },
   ];
-  const [spritesheetImg, backgroundImg, audioClipBuffers] = await Promise.all([
+  const [audioClipBuffers, spritesheetImg, backgroundImg, defaultFontImg] = await Promise.all([
+    loadAudioClips(audioCtx, AUDIOCLIPS),
     loadImage("assets/spritesheet.png"),
     loadImage("assets/nebula-background.png"),
-    loadAudioClips(audioCtx, AUDIOCLIPS),
+    loadImage("assets/default-font-no-shadow.png")
   ]);
 
-  console.log("AudioClipBuffers", audioClipBuffers);
   globalThis.AUDIO_MANAGER = createAudioManager(
     audioCtx,
     audioClipBuffers,
     0.2
   );
+
+  const fonts: {[key: string]: IFont} = {
+    "default": {
+      img: defaultFontImg,
+      characterIndexes: indexChars("abcdefghijklmnopqrstuvwxyz0123456789.!-:"),
+      charWidth: 9,
+      charHeight: 11,
+      caseSensitive: false
+    }
+  }
 
   // --- INITIALIZE ECS ---
   const ecs = new ECS();
@@ -91,7 +102,9 @@ window.addEventListener("focus", () => resetKeymap());
     renderingSystem: new RenderingSystem(ctx, canvas, {
       backgroundImg,
       spritesheetImg,
-    }),
+    },
+    fonts,
+    ),
   };
 
   Object.values(SYSTEMS).forEach((sys) => ecs.addSystem(sys));
