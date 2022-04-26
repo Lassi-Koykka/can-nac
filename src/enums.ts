@@ -1,6 +1,7 @@
 export enum SpriteType {
   PLACEHOLDER,
-  SPRITE
+  SPRITE,
+  DIRECTIONAL_SPRITE
 }
 
 export enum Align {

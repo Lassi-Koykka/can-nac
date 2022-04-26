@@ -24,8 +24,9 @@ export default class AnimationSystem extends System {
 
       if (!a.lastFrameTime) a.lastFrameTime = now;
 
-      if (now - a.lastFrameTime > frameDuration
-        || !animation.frames.includes(sprite.coords)) {
+      if (now - a.lastFrameTime > frameDuration &&
+        sprite.currSprite !== animation.frames[a.currFrame] 
+        || !animation.frames.includes(sprite.currSprite)) {
 
         // Animation types
         if (animation.type === "loop")
@@ -38,7 +39,7 @@ export default class AnimationSystem extends System {
           a.currFrame = animation.frames.length - 1;
 
         const frameCoords = animation.frames[a.currFrame];
-        sprite.coords = frameCoords;
+        sprite.currSprite = frameCoords;
         a.lastFrameTime = now;
         a.currFrame += 1;
       }

@@ -79,9 +79,11 @@ export class Sprite extends Component {
   constructor(
     public spriteType: SpriteType,
     public style: string,
-    public coords: { x: number; y: number }
+    public currSprite: { x: number; y: number },
+    public sprites: {[name: string]: { x: number, y: number}} = {}
   ) {
     super();
+    sprites.default = currSprite
   }
 }
 

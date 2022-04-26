@@ -32,7 +32,7 @@ export const spawnPlayer = (ecs: ECS, x: number, y: number) => {
         fireRate: 300,
         bulletSize: 6,
         damage: 1,
-        bulletType: "ball",
+        bulletType: "default",
         bulletDirections: [
           {x: 0, y: -1},
           // {x: -1, y: 0},

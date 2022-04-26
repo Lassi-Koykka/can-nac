@@ -112,3 +112,16 @@ export const indexChars = (str: string) => {
   }
   return charIndexes;
 };
+
+export const getDirKey = (dir: { x: number; y: number }) => {
+  const { x, y } = dir;
+  if (x === 0 && y === -1) return "N";
+  else if (x === 1 && y === 0) return "E";
+  else if (x === 0 && y === 1) return "S";
+  else if (x === -1 && y === 0) return "W";
+  else if (x > 0 && y < 0) return "NE";
+  else if (x < 0 && y < 0) return "NW";
+  else if (x > 0 && y > 0) return "SE";
+  else if (x < 0 && y > 0) return "SW";
+  return "default";
+};

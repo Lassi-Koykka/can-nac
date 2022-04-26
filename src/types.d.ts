@@ -1,4 +1,5 @@
 import {System} from "./ecs";
+import {BULLET_TYPES} from "./entities/bullet";
 import { FireMode } from "./enums";
 
 // Global types
@@ -20,7 +21,6 @@ export type Keymap = { [key: string]: boolean | undefined };
 
 // Component types
 export type soundClipType = "explosion" | "laserShot" | "death" | "hitHurt";
-export type bulletType = "ball" | "wave" | "laser";
 export type AnimationType = "loop" | "single" | "hold";
 export type AnimationFrames = { x: number; y: number }[];
 
@@ -35,7 +35,7 @@ export interface Gun {
   fireRate: number;
   bulletSize: number;
   damage: number;
-  bulletType: bulletType;
+  bulletType: keyof typeof BULLET_TYPES;
   bulletDirections: { x: number; y: number }[];
   lastShotTime?: number;
 }
