@@ -35,5 +35,7 @@ export enum FireMode {
 
 export enum MovementPatternType {
   SINE_VERTICAL,
-  SINE_HORIZONTAL
+  SINE_HORIZONTAL,
+  SINE_VERTICAL_STATIONARY,
+  HORIZONTAL_BAF
 }

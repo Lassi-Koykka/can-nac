@@ -95,9 +95,9 @@ window.addEventListener("focus", () => resetKeymap());
   const ecs = new ECS();
   globalThis.SYSTEMS = {
     inputSystem: new PlayerInputSystem(),
-    movementPatternSystem: new PatternMovementSystem(),
+    movementPatternSystem: new PatternMovementSystem(canvas),
     collisionSystem: new CollisionSystem(canvas),
-    enemySpawnerSystem: new EnemySpawnerSystem(canvas.width, 7),
+    enemySpawnerSystem: new EnemySpawnerSystem(canvas.width, 3),
     animationSystem: new AnimationSystem(),
     renderingSystem: new RenderingSystem(ctx, canvas, {
       backgroundImg,

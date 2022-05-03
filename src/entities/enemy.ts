@@ -42,6 +42,7 @@ const ENEMY_TYPES: {[key: string]: Component[]} = {
     new Speed(20),
     new Health(1, 1),
     new Transform(14, 14),
+    new MovementPattern(MovementPatternType.HORIZONTAL_BAF),
     new Sprite(SpriteType.SPRITE, "blue", {x:14, y:56}),
     new Animations({
       default: createAnimation([{ x:14, y:56 }]),
