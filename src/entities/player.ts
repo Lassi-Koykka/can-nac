@@ -1,3 +1,4 @@
+import animations from "../animations";
 import {
   Health,
   Position,
@@ -44,21 +45,9 @@ export const spawnPlayer = (ecs: ECS, x: number, y: number) => {
     ]),
     new Sprite(SpriteType.SPRITE, "white", { x: 0, y: 0 }),
     new Animations({
-      default: createAnimation([{ x: 0, y: 0 }]),
-      turning_right: createAnimation(
-        [
-          { x: 28, y: 0 },
-          { x: 56, y: 0 },
-        ],
-        "hold",
-      ),
-      turning_left: createAnimation(
-        [
-          { x: 84, y: 0 },
-          { x: 112, y: 0 },
-        ],
-        "hold",
-      ),
+      default: animations.ship1_default,
+      turning_right: animations.ship1_turning_right,
+      turning_left: animations.ship1_turning_left,
     }),
   ];
 

@@ -1,4 +1,4 @@
-import {System} from "./ecs";
+import {ECS, System} from "./ecs";
 import {BULLET_TYPES} from "./entities/bullet";
 import { FireMode } from "./enums";
 
@@ -25,9 +25,10 @@ export type AnimationType = "loop" | "single" | "hold";
 export type AnimationFrames = { x: number; y: number }[];
 
 export interface SpriteAnimation {
-  type: AnimationType;
+  type: string;
   frames: AnimationFrames;
   fps: number;
+  callback?: (ecs: ECS, entity: number) => void
 }
 
 export interface Gun {

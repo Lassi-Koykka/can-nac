@@ -1,4 +1,5 @@
 import {
+  Animations,
   Collider,
   Direction,
   Health,
@@ -43,6 +44,7 @@ export default class CollisionSystem extends System {
         dir: comps.get(Direction),
         col: comps.get(Collider),
         trans: comps.get(Transform),
+        anim: comps.get(Animations)
       };
     });
 
@@ -79,7 +81,12 @@ export default class CollisionSystem extends System {
         );
         if (isOOB(newPosX, newPosY, width, height, 10) || target) {
           if (target) {
-            this.ecs.removeEntity(target.entity);
+            if(target.anim?.animations?.death) {
+              this.ecs.removeComponent(target.entity, Collider)
+              target.anim.setState("death")
+            } else {
+              this.ecs.removeEntity(target.entity);
+            }
             AUDIO_MANAGER.playClip("explosion")
           }
           // console.log("Removing bullet");

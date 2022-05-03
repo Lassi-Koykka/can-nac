@@ -1,5 +1,6 @@
 import { BufferLoader } from "./bufferloader";
 import { Position, Transform } from "./components";
+import {ECS} from "./ecs";
 import { Align } from "./enums";
 import { AnimationFrames, AnimationType, SpriteAnimation } from "./types";
 
@@ -101,8 +102,9 @@ const removeOffset = (coord: number, size: number, align: Align) => {
 export const createAnimation = (
   frames: AnimationFrames = [],
   type: AnimationType = "loop",
-  fps: number = 6
-): SpriteAnimation => ({ type, frames, fps });
+  fps: number = 6,
+  callback?: (ecs: ECS, entity: number) => void
+): SpriteAnimation => ({ type, frames, fps, callback });
 
 export const indexChars = (str: string) => {
   let charIndexes: { [char: string]: number } = {};

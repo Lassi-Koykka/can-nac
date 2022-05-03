@@ -28,6 +28,7 @@ export default class EnemySpawnerSystem extends System {
       return false
     }).length; 
 
+    // console.log("currEnemyCount", currEnemyCount, now, "-", this.lastSpawn, "=", now - this.lastSpawn)
     if(currEnemyCount < this.maxEnemyCount && now - this.lastSpawn > this.spawnCooldown ) {
       const enemyList: enemyType[] = ["large1", "small1", "small2", "small3", "small4"]
       // const enemyList: enemyType[] = ["small2"]

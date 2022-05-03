@@ -7,7 +7,8 @@ An ECS driven shoot-em-up game a created using vanilla canvas.
 - [x] Font on chromium based browsers
 
 ### Misc.
-- [ ] Fix bullet Sprites
+- [x] Fix bullet Sprites
+- [x] Directional sprites
 - [ ] Background art
 
 ### Systems and mechanics

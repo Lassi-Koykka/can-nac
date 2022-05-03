@@ -81,6 +81,7 @@ export class Sprite extends Component {
     public style: string,
     public currSprite: { x: number; y: number },
     public sprites: {[name: string]: { x: number, y: number}} = {}
+
   ) {
     super();
     sprites.default = currSprite

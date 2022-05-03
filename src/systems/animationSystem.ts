@@ -24,18 +24,26 @@ export default class AnimationSystem extends System {
 
       if (!a.lastFrameTime) a.lastFrameTime = now;
 
-      if (now - a.lastFrameTime > frameDuration &&
-        sprite.currSprite !== animation.frames[a.currFrame] 
-        || !animation.frames.includes(sprite.currSprite)) {
-
+      if (
+        (now - a.lastFrameTime > frameDuration &&
+          sprite.currSprite !== animation.frames[a.currFrame]) ||
+        !animation.frames.includes(sprite.currSprite)
+      ) {
         // Animation types
         if (animation.type === "loop")
           a.currFrame = a.currFrame % animation.frames.length;
-        else if (animation.type === "single" &&
-          a.currFrame >= animation.frames.length)
-          a.setState("default");
-        else if (animation.type === "hold" &&
-          a.currFrame >= animation.frames.length)
+        else if (
+          animation.type === "single" &&
+          a.currFrame >= animation.frames.length
+        ) {
+          if(animation.callback) {
+            animation.callback(this.ecs, e);
+            return;
+          }
+        } else if (
+          animation.type === "hold" &&
+          a.currFrame >= animation.frames.length
+        )
           a.currFrame = animation.frames.length - 1;
 
         const frameCoords = animation.frames[a.currFrame];

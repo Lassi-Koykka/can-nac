@@ -115,7 +115,7 @@ export default class RenderingSystem extends System {
         sprite.spriteType === SpriteType.DIRECTIONAL_SPRITE &&
         dir
       ) {
-        console.log(dir)
+        // console.log(dir)
         const dirKey = getDirKey(dir)
         const {x , y} = sprite.sprites[dirKey] || sprite.sprites.default
         ctx.drawImage(
@@ -157,7 +157,7 @@ export default class RenderingSystem extends System {
       verticalAlign = Align.END,
       horizontalAlign = Align.START,
       scale = 1,
-      color = "white",
+      // color = "white",
       shadow,
     } = options;
 
@@ -203,17 +203,19 @@ export default class RenderingSystem extends System {
     });
     ctx.restore();
   }
+  
 
-  drawFPS(delta: number) {
+  drawHUD(delta: number) {
+    // DrawFPS
     this.drawText("FPS:" + Math.round(1 / delta), this.canvasWidth, 0, {
       horizontalAlign: Align.END,
       verticalAlign: Align.START,
       color: "red",
-      // shadow: {
-      //   color: "red",
-      //   offsetX: 1,
-      //   offsetY: 1,
-      // },
+      shadow: {
+        color: "red",
+        offsetX: 1,
+        offsetY: 0,
+      },
     });
   }
 
@@ -227,6 +229,6 @@ export default class RenderingSystem extends System {
     this.drawEntities(entities);
 
     // DRAW HUD
-    this.drawFPS(delta);
+    this.drawHUD(delta)
   }
 }
