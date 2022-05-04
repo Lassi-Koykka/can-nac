@@ -9,7 +9,7 @@ An ECS driven shoot-em-up game a created using vanilla canvas.
 ### Misc.
 - [x] Fix bullet Sprites
 - [x] Directional sprites
-- [ ] Background art
+- [ ] Background layers
 
 ### Systems and mechanics
 
@@ -17,8 +17,7 @@ An ECS driven shoot-em-up game a created using vanilla canvas.
 - [x] Animation System
 - [x] Audio System
 - [x] Drawing custom font text with shadows
-- [ ] Enemy movement patterns
-    - [ ] Pathfinding from point to point
+- [x] Basic enemy movement patterns
 - [ ] Enemy attacks
 - [ ] Health system
 - [ ] Player damage
@@ -38,3 +37,4 @@ An ECS driven shoot-em-up game a created using vanilla canvas.
 
 ### Nice-to-have
 - [ ] Level editor
+- [ ] Advanced movement patterns: eg. Pathfinding from point to point

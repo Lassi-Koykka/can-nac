@@ -10,18 +10,12 @@ import {
   Transform,
 } from "../components";
 import { Entity, System } from "../ecs";
-import {EntityStatus, EntityTag} from "../enums";
+import { EntityStatus, EntityTag } from "../enums";
 import { getOrigin } from "../utils";
 
 export default class CollisionSystem extends System {
   canvas: HTMLCanvasElement;
-  componentsRequired = new Set<Function>([
-    Position,
-    Direction,
-    Speed,
-    Transform,
-    Collider,
-  ]);
+  componentsRequired = new Set<Function>([Position, Direction, Speed]);
 
   constructor(canvas: HTMLCanvasElement) {
     super();
@@ -44,7 +38,7 @@ export default class CollisionSystem extends System {
         dir: comps.get(Direction),
         col: comps.get(Collider),
         trans: comps.get(Transform),
-        anim: comps.get(Animations)
+        anim: comps.get(Animations),
       };
     });
 
@@ -55,42 +49,49 @@ export default class CollisionSystem extends System {
       let newPosY = pos.y + dir.y * speed.value * delta;
 
       // Check collisions
-      const collisions = gameObjects.filter((go) =>
-        go.entity !== entity && collision(pos, trans, go.pos, go.trans)
-      );
-
-      if (tag === EntityTag.PLAYER) {
-        if (newPosX < 2 || newPosX > width - 2 - trans.width) newPosX = pos.x;
-        if (newPosY < 2 || newPosY > height - 2 - trans.height) newPosY = pos.y;
-      }
-
-      if (tag === EntityTag.ENEMY) {
-        if (newPosY > height) {
-          this.ecs.removeEntity(entity);
-          // console.log("Removing enemy");
-        }
-      }
-
-      if (tag === EntityTag.PROJECTILE) {
-        const target = collisions.find(
-          (c) =>
-            c.tag ===
-            (status === EntityStatus.FRIENDLY
-              ? EntityTag.ENEMY
-              : EntityTag.PLAYER)
+      if (col && trans) {
+        const collisions = gameObjects.filter(
+          (go) =>
+            go.entity !== entity &&
+            go.col &&
+            go.trans &&
+            collision(pos, trans, go.pos, go.trans)
         );
-        if (isOOB(newPosX, newPosY, width, height, 10) || target) {
-          if (target) {
-            if(target.anim?.animations?.death) {
-              this.ecs.removeComponent(target.entity, Collider)
-              target.anim.setState("death")
-            } else {
-              this.ecs.removeEntity(target.entity);
-            }
-            AUDIO_MANAGER.playClip("explosion")
+
+        if (tag === EntityTag.PLAYER) {
+          if (newPosX < 2 || newPosX > width - 2 - trans.width) newPosX = pos.x;
+          if (newPosY < 2 || newPosY > height - 2 - trans.height)
+            newPosY = pos.y;
+        }
+
+        if (tag === EntityTag.ENEMY) {
+          if (newPosY > height) {
+            this.ecs.removeEntity(entity);
+            // console.log("Removing enemy");
           }
-          // console.log("Removing bullet");
-          this.ecs.removeEntity(entity);
+        }
+
+        if (tag === EntityTag.PROJECTILE) {
+          const target = collisions.find(
+            (c) =>
+              c.tag ===
+              (status === EntityStatus.FRIENDLY
+                ? EntityTag.ENEMY
+                : EntityTag.PLAYER)
+          );
+          if (isOOB(newPosX, newPosY, width, height, 10) || target) {
+            if (target) {
+              if (target.anim?.animations?.death) {
+                this.ecs.removeComponent(target.entity, Collider);
+                target.anim.setState("death");
+              } else {
+                this.ecs.removeEntity(target.entity);
+              }
+              AUDIO_MANAGER.playClip("explosion");
+            }
+            // console.log("Removing bullet");
+            this.ecs.removeEntity(entity);
+          }
         }
       }
 

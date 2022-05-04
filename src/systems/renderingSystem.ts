@@ -1,8 +1,15 @@
-import { Direction, Position, Sprite, Transform } from "../components";
-import { Entity, System } from "../ecs";
-import { Align, SpriteType } from "../enums";
+import {
+  Collider,
+  Direction,
+  Position,
+  Speed,
+  Sprite,
+  Transform,
+} from "../components";
+import { Component, Entity, System } from "../ecs";
+import { Align, ColliderType, SpriteType } from "../enums";
 import { IFont } from "../types";
-import { getDirKey, getOrigin } from "../utils";
+import { getDirKey, getOrigin, randomInt } from "../utils";
 
 interface IDrawTextOptions<T = undefined> {
   font?: IFont;
@@ -29,9 +36,12 @@ export default class RenderingSystem extends System {
   spritesheet: HTMLImageElement;
   background: HTMLImageElement;
   fonts: { [name: string]: IFont };
+  stars: Entity[] = [];
+  lastStarSpawn: number = 0;
+  starSpeeds = [100, 160, 220];
 
-  backgroundYOffset = 0;
-  backgroundMoveSpeed = 250;
+  // backgroundYOffset = 0;
+  // backgroundMoveSpeed = 250;
 
   constructor(
     ctx: CanvasRenderingContext2D,
@@ -51,41 +61,80 @@ export default class RenderingSystem extends System {
     this.fonts = fonts;
   }
 
-  drawBackground(delta: number) {
+  // drawBackgroundV1(delta: number) {
+  //   const ctx = this.ctx;
+
+  //   const backgroundY = Math.round(
+  //     this.background.naturalHeight - this.canvasHeight - this.backgroundYOffset
+  //   );
+  //   if (backgroundY < 0) {
+  //     ctx.drawImage(
+  //       this.background,
+  //       0,
+  //       this.background.naturalHeight - Math.abs(backgroundY) - 2,
+  //       this.canvasWidth,
+  //       this.canvasHeight,
+  //       0,
+  //       0,
+  //       this.canvasWidth,
+  //       this.canvasHeight
+  //     );
+  //   }
+  //   ctx.drawImage(
+  //     this.background,
+  //     0,
+  //     backgroundY,
+  //     this.canvasWidth,
+  //     this.canvasHeight,
+  //     0,
+  //     0,
+  //     this.canvasWidth,
+  //     this.canvasHeight
+  //   );
+  //   this.backgroundYOffset += this.backgroundMoveSpeed * delta;
+
+  //   if (backgroundY <= -this.canvasHeight) {
+  //     this.backgroundYOffset = 2;
+  //   }
+  // }
+
+  drawBackgroundV2() {
     const ctx = this.ctx;
-
-    const backgroundY = Math.round(
-      this.background.naturalHeight - this.canvasHeight - this.backgroundYOffset
-    );
-    if (backgroundY < 0) {
-      ctx.drawImage(
-        this.background,
-        0,
-        this.background.naturalHeight - Math.abs(backgroundY) - 2,
-        this.canvasWidth,
-        this.canvasHeight,
-        0,
-        0,
-        this.canvasWidth,
-        this.canvasHeight
+    const now = new Date().getTime();
+    if (now - this.lastStarSpawn > 100) {
+      const newStar = this.ecs.addEntity();
+      const x = randomInt(1, this.canvasWidth);
+      const distanceIdx = randomInt(0, this.starSpeeds.length)
+      const speed = this.starSpeeds[distanceIdx];
+      const components: Component[] = [
+        new Position(x, -5),
+        new Transform(distanceIdx + 1 , distanceIdx + 1),
+        new Speed(speed),
+        new Direction(0, 1),
+      ];
+      components.forEach((c) =>
+        this.ecs.addComponent(newStar, c)
       );
+      this.lastStarSpawn = now;
+      this.stars.push(newStar);
     }
-    ctx.drawImage(
-      this.background,
-      0,
-      backgroundY,
-      this.canvasWidth,
-      this.canvasHeight,
-      0,
-      0,
-      this.canvasWidth,
-      this.canvasHeight
-    );
-    this.backgroundYOffset += this.backgroundMoveSpeed * delta;
+    this.stars.forEach((e) => {
+      const comps = this.ecs.getComponents(e);
+      const pos = comps.get(Position);
+      const transform = comps.get(Transform);
 
-    if (backgroundY <= -this.canvasHeight) {
-      this.backgroundYOffset = 2;
-    }
+      ctx.save();
+      ctx.strokeStyle = "white";
+      ctx.fillStyle = "white";
+      ctx.beginPath();
+      ctx.fillRect(
+        Math.round(pos.x),
+        Math.round(pos.y),
+        transform.width,
+        transform.height
+      );
+      ctx.restore();
+    });
   }
 
   drawEntities(entities: Set<Entity>) {
@@ -111,13 +160,10 @@ export default class RenderingSystem extends System {
           transform.width,
           transform.height
         );
-      } else if (
-        sprite.spriteType === SpriteType.DIRECTIONAL_SPRITE &&
-        dir
-      ) {
+      } else if (sprite.spriteType === SpriteType.DIRECTIONAL_SPRITE && dir) {
         // console.log(dir)
-        const dirKey = getDirKey(dir)
-        const {x , y} = sprite.sprites[dirKey] || sprite.sprites.default
+        const dirKey = getDirKey(dir);
+        const { x, y } = sprite.sprites[dirKey] || sprite.sprites.default;
         ctx.drawImage(
           this.spritesheet,
           x,
@@ -203,7 +249,6 @@ export default class RenderingSystem extends System {
     });
     ctx.restore();
   }
-  
 
   drawHUD(delta: number) {
     // DrawFPS
@@ -223,12 +268,12 @@ export default class RenderingSystem extends System {
     // DRAW MENU IF GAMESTATE IS NOT RUNNING
 
     // DRAW BACKGROUND
-    this.drawBackground(delta);
+    this.drawBackgroundV2();
 
     // DRAW ENTITIES
     this.drawEntities(entities);
 
     // DRAW HUD
-    this.drawHUD(delta)
+    this.drawHUD(delta);
   }
 }
