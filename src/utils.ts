@@ -98,6 +98,8 @@ const removeOffset = (coord: number, size: number, align: Align) => {
   }
 };
 
+export const clamp = (num: number, min: number, max: number) => Math.min(Math.max(num, min), max)
+
 // Misc
 export const createAnimation = (
   frames: AnimationFrames = [],

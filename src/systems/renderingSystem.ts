@@ -9,7 +9,7 @@ import {
 import { Component, Entity, System } from "../ecs";
 import { Align, ColliderType, SpriteType } from "../enums";
 import { IFont } from "../types";
-import { getDirKey, getOrigin, randomInt } from "../utils";
+import { clamp, getDirKey, getOrigin, randomInt } from "../utils";
 
 interface IDrawTextOptions<T = undefined> {
   font?: IFont;
@@ -38,10 +38,11 @@ export default class RenderingSystem extends System {
   fonts: { [name: string]: IFont };
   stars: Entity[] = [];
   lastStarSpawn: number = 0;
-  starSpeeds = [100, 160, 220];
+  starSpeeds = [80, 100, 130, 220];
+  starColors = ["#a4e4fc", "#b8f8d8", "#fcfcfc"]
 
-  // backgroundYOffset = 0;
-  // backgroundMoveSpeed = 250;
+  backgroundYOffset = 0;
+  backgroundMoveSpeed = 250;
 
   constructor(
     ctx: CanvasRenderingContext2D,
@@ -61,54 +62,57 @@ export default class RenderingSystem extends System {
     this.fonts = fonts;
   }
 
-  // drawBackgroundV1(delta: number) {
-  //   const ctx = this.ctx;
+  drawBackground(delta: number) {
+    const ctx = this.ctx;
 
-  //   const backgroundY = Math.round(
-  //     this.background.naturalHeight - this.canvasHeight - this.backgroundYOffset
-  //   );
-  //   if (backgroundY < 0) {
-  //     ctx.drawImage(
-  //       this.background,
-  //       0,
-  //       this.background.naturalHeight - Math.abs(backgroundY) - 2,
-  //       this.canvasWidth,
-  //       this.canvasHeight,
-  //       0,
-  //       0,
-  //       this.canvasWidth,
-  //       this.canvasHeight
-  //     );
-  //   }
-  //   ctx.drawImage(
-  //     this.background,
-  //     0,
-  //     backgroundY,
-  //     this.canvasWidth,
-  //     this.canvasHeight,
-  //     0,
-  //     0,
-  //     this.canvasWidth,
-  //     this.canvasHeight
-  //   );
-  //   this.backgroundYOffset += this.backgroundMoveSpeed * delta;
+    const backgroundY = Math.round(
+      this.background.naturalHeight - this.canvasHeight - this.backgroundYOffset
+    );
+    if (backgroundY < 0) {
+      ctx.drawImage(
+        this.background,
+        0,
+        this.background.naturalHeight - Math.abs(backgroundY) - 2,
+        this.canvasWidth,
+        this.canvasHeight,
+        0,
+        0,
+        this.canvasWidth,
+        this.canvasHeight
+      );
+    }
+    ctx.drawImage(
+      this.background,
+      0,
+      backgroundY,
+      this.canvasWidth,
+      this.canvasHeight,
+      0,
+      0,
+      this.canvasWidth,
+      this.canvasHeight
+    );
+    this.backgroundYOffset += this.backgroundMoveSpeed * delta;
 
-  //   if (backgroundY <= -this.canvasHeight) {
-  //     this.backgroundYOffset = 2;
-  //   }
-  // }
+    if (backgroundY <= -this.canvasHeight) {
+      this.backgroundYOffset = 2;
+    }
 
-  drawBackgroundV2() {
+    this.drawStars()
+  }
+
+  drawStars() {
     const ctx = this.ctx;
     const now = new Date().getTime();
-    if (now - this.lastStarSpawn > 100) {
+    if (now - this.lastStarSpawn > 50) {
       const newStar = this.ecs.addEntity();
       const x = randomInt(1, this.canvasWidth);
       const distanceIdx = randomInt(0, this.starSpeeds.length)
       const speed = this.starSpeeds[distanceIdx];
+      const size = clamp(distanceIdx, 1, 2)
       const components: Component[] = [
         new Position(x, -5),
-        new Transform(distanceIdx + 1 , distanceIdx + 1),
+        new Transform(size, size),
         new Speed(speed),
         new Direction(0, 1),
       ];
@@ -121,18 +125,29 @@ export default class RenderingSystem extends System {
     this.stars.forEach((e) => {
       const comps = this.ecs.getComponents(e);
       const pos = comps.get(Position);
-      const transform = comps.get(Transform);
+      const {width} = comps.get(Transform);
+
+      if(pos.y > this.canvasHeight) {
+        this.stars = this.stars.filter(s => s !== e)
+        this.ecs.removeEntity(e)
+        return
+      }
 
       ctx.save();
-      ctx.strokeStyle = "white";
-      ctx.fillStyle = "white";
+      const color = width < 2 ? this.starColors[0] : this.starColors[pos.x % 2 + 1]
+      ctx.strokeStyle = color;
+      ctx.fillStyle = color;
       ctx.beginPath();
       ctx.fillRect(
         Math.round(pos.x),
         Math.round(pos.y),
-        transform.width,
-        transform.height
+        width,
+        width
       );
+      if(width >= 3) {
+        ctx.fillStyle = "#fcfcfc"
+        ctx.fillRect(Math.round(pos.x) + 1, Math.round(pos.y) + 1, 1, 1)
+      }
       ctx.restore();
     });
   }
@@ -268,7 +283,8 @@ export default class RenderingSystem extends System {
     // DRAW MENU IF GAMESTATE IS NOT RUNNING
 
     // DRAW BACKGROUND
-    this.drawBackgroundV2();
+    this.drawStars()
+    // this.drawBackground(delta);
 
     // DRAW ENTITIES
     this.drawEntities(entities);

@@ -9,7 +9,7 @@ An ECS driven shoot-em-up game a created using vanilla canvas.
 ### Misc.
 - [x] Fix bullet Sprites
 - [x] Directional sprites
-- [ ] Background layers
+- [x] Background layers
 
 ### Systems and mechanics
 

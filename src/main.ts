@@ -71,7 +71,7 @@ window.addEventListener("focus", () => resetKeymap());
   const [audioClipBuffers, spritesheetImg, backgroundImg, defaultFontImg] = await Promise.all([
     loadAudioClips(audioCtx, AUDIOCLIPS),
     loadImage("assets/spritesheet.png"),
-    loadImage("assets/nebula-background.png"),
+    loadImage("assets/background.png"),
     loadImage("assets/default-font-no-shadow.png")
   ]);
 
