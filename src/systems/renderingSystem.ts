@@ -109,7 +109,7 @@ export default class RenderingSystem extends System {
       const x = randomInt(1, this.canvasWidth);
       const distanceIdx = randomInt(0, this.starSpeeds.length)
       const speed = this.starSpeeds[distanceIdx];
-      const size = clamp(distanceIdx, 1, 2)
+      const size = 1
       const components: Component[] = [
         new Position(x, -5),
         new Transform(size, size),
@@ -134,7 +134,7 @@ export default class RenderingSystem extends System {
       }
 
       ctx.save();
-      const color = width < 2 ? this.starColors[0] : this.starColors[pos.x % 2 + 1]
+      const color = this.starColors[pos.x % this.starColors.length]
       ctx.strokeStyle = color;
       ctx.fillStyle = color;
       ctx.beginPath();

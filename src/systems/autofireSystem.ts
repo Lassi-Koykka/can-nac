@@ -13,11 +13,11 @@ export default class AutofireSystem extends System {
   public update(entities: Set<Entity>, _: number): void {
     Array.from(entities).forEach((e) => {
       const comps = this.ecs.getComponents(e);
-      const { gun, defaultOffset } = comps.get(AutofireGun);
+      const { gun, defaultOffset, enabled } = comps.get(AutofireGun);
       const { value: status } = comps.get(Status)
       const pos = comps.get(Position);
 
-      shoot(this.ecs, gun, pos, status, defaultOffset)
+      enabled && pos.y > 0 && shoot(this.ecs, gun, pos, status, defaultOffset)
     });
   }
 }
