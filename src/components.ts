@@ -105,7 +105,14 @@ export class Animations extends Component {
   }
 }
 
-export class Guns extends Component {
+
+export class AutofireGun extends Component {
+  constructor(public gun: Gun, public defaultOffset: {x: number ,y: number}) {
+    super();
+  }
+}
+
+export class GunInventory extends Component {
   constructor(public gunList: Gun[], public active: number = 0 ) {
     super();
   }

@@ -3,6 +3,7 @@ import { ECS } from "./ecs";
 import { spawnPlayer } from "./entities/player";
 import "./style.css";
 import AnimationSystem from "./systems/animationSystem";
+import AutofireSystem from "./systems/autofireSystem";
 import CollisionSystem from "./systems/collisionSystem";
 import EnemySpawnerSystem from "./systems/enemySpawnerSystem";
 import PatternMovementSystem from "./systems/patternMovementSystem";
@@ -99,6 +100,7 @@ window.addEventListener("focus", () => resetKeymap());
   const ecs = new ECS();
   globalThis.SYSTEMS = {
     inputSystem: new PlayerInputSystem(),
+    autofireSystem: new AutofireSystem(),
     movementPatternSystem: new PatternMovementSystem(canvas),
     collisionSystem: new CollisionSystem(canvas),
     enemySpawnerSystem: new EnemySpawnerSystem(canvas.width, 3),

@@ -1,5 +1,4 @@
 import {ECS, System} from "./ecs";
-import {BULLET_TYPES} from "./entities/bullet";
 import { FireMode } from "./enums";
 
 // Global types
@@ -34,10 +33,9 @@ export interface SpriteAnimation {
 export interface Gun {
   fireMode: FireMode;
   fireRate: number;
-  bulletSize: number;
   damage: number;
-  bulletType: keyof typeof BULLET_TYPES;
-  bulletDirections: { x: number; y: number }[];
+  bulletType: string;
+  bullets: { dirX: number; dirY: number, offsetX?: number, offsetY?: number }[];
   lastShotTime?: number;
 }
 

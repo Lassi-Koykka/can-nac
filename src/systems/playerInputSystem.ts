@@ -1,25 +1,23 @@
 import {
   Animations,
   Direction,
-  Guns,
+  GunInventory,
   InputListener,
   Position,
   Transform,
 } from "../components";
 import { Entity, System } from "../ecs";
-import { spawnBullet } from "../entities/bullet";
-import {EntityStatus, FireMode} from "../enums";
+import { shoot } from "../entities/bullet";
+import { EntityStatus, FireMode } from "../enums";
 import { normalizeVector } from "../utils";
-
 
 const INPUT = {
   UP: ["w", "arrowup"],
   DOWN: ["s", "arrowdown"],
   LEFT: ["a", "arrowleft"],
   RIGHT: ["d", "arrowright"],
-  ACTION1: [" "]
-}
-
+  ACTION1: [" "],
+};
 
 export default class PlayerInputSystem extends System {
   componentsRequired = new Set<Function>([
@@ -27,7 +25,7 @@ export default class PlayerInputSystem extends System {
     Position,
     Transform,
     Direction,
-    Guns,
+    GunInventory,
   ]);
   public update(entities: Set<Entity>, _: number): void {
     entities.forEach((e) => {
@@ -36,15 +34,17 @@ export default class PlayerInputSystem extends System {
       let pos = comps.get(Position);
       let transform = comps.get(Transform);
       let animations = comps.get(Animations);
-      let guns = comps.get(Guns);
+      let guns = comps.get(GunInventory);
 
       // Static movement, no acceleration
       if (keyPress("UP") || (!keyDown("DOWN") && keyDown("UP"))) dir.y = -1;
       if (keyPress("DOWN") || (!keyDown("UP") && keyDown("DOWN"))) dir.y = 1;
       if (!keyDown("UP") && !keyDown("DOWN")) dir.y = 0;
 
-      if (keyPress("LEFT") || (!keyDown("RIGHT") && keyDown("LEFT"))) dir.x = -1;
-      if (keyPress("RIGHT") || (!keyDown("LEFT") && keyDown("RIGHT"))) dir.x = 1;
+      if (keyPress("LEFT") || (!keyDown("RIGHT") && keyDown("LEFT")))
+        dir.x = -1;
+      if (keyPress("RIGHT") || (!keyDown("LEFT") && keyDown("RIGHT")))
+        dir.x = 1;
       if (!keyDown("LEFT") && !keyDown("RIGHT")) dir.x = 0;
 
       const normVel = normalizeVector({ x: dir.x, y: dir.y });
@@ -66,32 +66,22 @@ export default class PlayerInputSystem extends System {
       }
 
       const gun = guns.getActive();
-      if (gun.fireMode === FireMode.SEMIAUTO && keyPress("ACTION1") 
-          || gun.fireMode === FireMode.AUTO && keyDown("ACTION1")) {
-        const fireDelay = 60000 / gun.fireRate;
-        const now = new Date().getTime();
-        if (!gun.lastShotTime || now - gun.lastShotTime > fireDelay) {
-          AUDIO_MANAGER.playClip("laserShot")
-          gun.lastShotTime = now;
-          gun.bulletDirections.forEach((dir) => {
-            spawnBullet(
-              this.ecs,
-              EntityStatus.FRIENDLY,
-              pos.x + (transform.width / 2),
-              pos.y - 5,
-              dir,
-              gun.bulletType,
-              gun.damage
-            );
-          });
-        }
+      if (
+        (gun.fireMode === FireMode.SEMIAUTO && keyPress("ACTION1")) ||
+        (gun.fireMode === FireMode.AUTO && keyDown("ACTION1"))
+      ) {
+        const defaultOffset = { x: transform.width / 2, y: -5 };
+        shoot(this.ecs, gun, pos, EntityStatus.FRIENDLY, defaultOffset);
       }
     });
   }
 }
 
-const keyDown = (input: keyof typeof INPUT) => INPUT[input].some(key => KEYMAP[key]);
+const keyDown = (input: keyof typeof INPUT) =>
+  INPUT[input].some((key) => KEYMAP[key]);
 const keyPress = (input: keyof typeof INPUT) =>
-  INPUT[input].some(key => KEYMAP[key]) && INPUT[input].every(key => !KEYMAP_PREV[key]);
+  INPUT[input].some((key) => KEYMAP[key]) &&
+  INPUT[input].every((key) => !KEYMAP_PREV[key]);
 const keyUp = (input: keyof typeof INPUT) =>
-  INPUT[input].some(key => !KEYMAP[key]) && INPUT[input].every(key => KEYMAP_PREV[key]);
+  INPUT[input].some((key) => !KEYMAP[key]) &&
+  INPUT[input].every((key) => KEYMAP_PREV[key]);

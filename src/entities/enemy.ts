@@ -11,14 +11,16 @@ import {
   Tag,
   MovementPattern,
   Animations,
+  AutofireGun,
 } from "../components";
 import { Component, ECS } from "../ecs";
-import {ColliderType, EntityStatus, EntityTag, MovementPatternType, SpriteType} from "../enums";
+import {ColliderType, EntityStatus, EntityTag, FireMode, MovementPatternType, SpriteType} from "../enums";
 import {createAnimation} from "../utils";
 
 export type enemyType = "large1" | "small1" | "small2" | "small3" | "small4"
-const ENEMY_TYPES: {[key: string]: Component[]} = {
-  "large1": [
+const enemy_type_comps = (enemytype: enemyType): Component[] => {
+  switch (enemytype) {
+  case "large1": return [
     new Speed(20),
     new Health(3, 3),
     new Transform(28, 28),
@@ -27,8 +29,8 @@ const ENEMY_TYPES: {[key: string]: Component[]} = {
       default: createAnimation([{ x:28, y:56 }]),
       death: animations.explosion_large,
     })
-  ],
-  "small1": [
+  ]
+  case "small1": return [
     new Speed(120),
     new Health(1, 1),
     new Transform(14, 14),
@@ -37,19 +39,35 @@ const ENEMY_TYPES: {[key: string]: Component[]} = {
       default: createAnimation([{ x:0, y:56 }]),
       death: animations.explosion_small,
     })
-  ],
-  "small2": [
+  ]
+  case "small2": return [
     new Speed(20),
     new Health(1, 1),
     new Transform(14, 14),
     new MovementPattern(MovementPatternType.HORIZONTAL_BAF),
     new Sprite(SpriteType.SPRITE, "blue", {x:14, y:56}),
+    new AutofireGun(
+      {
+        fireMode: FireMode.AUTO,
+        fireRate: 60,
+        damage: 1,
+        bulletType: "laser",
+        bullets: [
+          {dirX: 0, dirY: 1},
+        ]
+      },
+      {
+        x: 7,
+        y: 18
+      }
+    ),
     new Animations({
       default: createAnimation([{ x:14, y:56 }]),
       death: animations.explosion_small,
     })
-  ],
-  "small3": [
+  ]
+  case "small3": 
+    return [
     new Speed(75),
     new Health(1, 1),
     new Transform(14, 14),
@@ -59,8 +77,9 @@ const ENEMY_TYPES: {[key: string]: Component[]} = {
       default: createAnimation([{ x:0, y:70 }]),
       death: animations.explosion_small,
     })
-  ],
-  "small4": [
+  ]
+  case "small4":
+  return [
     new Speed(20),
     new Health(1, 1),
     new Transform(14, 14),
@@ -70,6 +89,7 @@ const ENEMY_TYPES: {[key: string]: Component[]} = {
       death: animations.explosion_small,
     })
   ]
+  }
 }
 
 export const spawnEnemy = (ecs: ECS, x: number, y: number, enemyType: enemyType) => {
@@ -80,9 +100,8 @@ export const spawnEnemy = (ecs: ECS, x: number, y: number, enemyType: enemyType)
     new Status(EntityStatus.ENEMY),
     new Collider(ColliderType.RECTANGLE),
     new Direction(0, 1),
-    ...ENEMY_TYPES[enemyType]
+    ...enemy_type_comps(enemyType)
   ];
-  
 
   components.forEach((c) => {
     ecs.addComponent(enemy, Object.create(c));

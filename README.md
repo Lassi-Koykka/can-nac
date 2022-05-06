@@ -22,6 +22,7 @@ An ECS driven shoot-em-up game a created using vanilla canvas.
 - [x] Health system
 - [ ] Way to reset and restart the game without refreshing
 - [ ] Enemy attacks
+- [ ] Enemy hit animation
 - [ ] Mouse input
 - [ ] Pausing
 - [ ] Score and win conditions
