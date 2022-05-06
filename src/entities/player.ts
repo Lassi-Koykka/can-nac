@@ -48,11 +48,12 @@ export const spawnPlayer = (ecs: ECS, x: number, y: number) => {
       default: animations.ship1_default,
       turning_right: animations.ship1_turning_right,
       turning_left: animations.ship1_turning_left,
+      death: animations.explosion_large
     }),
   ];
 
   components.forEach((c) => {
-    ecs.addComponent(player, c);
+    ecs.addComponent(player, Object.create(c));
   });
 
   return player;

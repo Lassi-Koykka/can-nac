@@ -67,6 +67,10 @@ window.addEventListener("focus", () => resetKeymap());
       name: "hitHurt",
       url: "assets/hitHurt.wav",
     },
+    {
+      name: "hitHurtEnemy",
+      url: "assets/hitHurt2.wav",
+    },
   ];
   const [audioClipBuffers, spritesheetImg, backgroundImg, defaultFontImg] = await Promise.all([
     loadAudioClips(audioCtx, AUDIOCLIPS),

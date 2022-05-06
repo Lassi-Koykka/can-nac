@@ -18,9 +18,10 @@ An ECS driven shoot-em-up game a created using vanilla canvas.
 - [x] Audio System
 - [x] Drawing custom font text with shadows
 - [x] Basic enemy movement patterns
-- [ ] Enemy attacks
-- [ ] Health system
+- [ ] Way to reset and restart the game without refreshing
 - [ ] Player damage
+- [ ] Health system
+- [ ] Enemy attacks
 - [ ] Mouse input
 - [ ] Pausing
 - [ ] Score and win conditions

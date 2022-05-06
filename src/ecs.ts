@@ -1,5 +1,7 @@
 export type Entity = number
-export abstract class Component { }
+export abstract class Component {
+    public enabled: boolean = true
+}
 export abstract class System {
     public abstract componentsRequired: Set<Function>
     public abstract update(entities: Set<Entity>, delta: number): void

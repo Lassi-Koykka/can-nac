@@ -3,6 +3,7 @@ import {
   Collider,
   Direction,
   Health,
+  InputListener,
   Position,
   Speed,
   Status,
@@ -10,6 +11,7 @@ import {
   Transform,
 } from "../components";
 import { Entity, System } from "../ecs";
+import { spawnPlayer } from "../entities/player";
 import { EntityStatus, EntityTag } from "../enums";
 import { getOrigin } from "../utils";
 
@@ -43,25 +45,53 @@ export default class CollisionSystem extends System {
     });
 
     gameObjects.forEach((gameObject) => {
-      const { tag, status, entity, pos, dir, speed, col, trans } = gameObject;
+      let { tag, health, status, anim, entity, pos, dir, speed, col, trans } =
+        gameObject;
 
       let newPosX = pos.x + dir.x * speed.value * delta;
       let newPosY = pos.y + dir.y * speed.value * delta;
 
+      if (tag === EntityTag.PLAYER) {
+        if (newPosX < 2 || newPosX > width - 2 - trans.width) newPosX = pos.x;
+        if (newPosY < 2 || newPosY > height - 2 - trans.height) newPosY = pos.y;
+      }
+
       // Check collisions
-      if (col && trans) {
+      if (col?.enabled && trans) {
         const collisions = gameObjects.filter(
           (go) =>
             go.entity !== entity &&
-            go.col &&
+            go.col?.enabled &&
             go.trans &&
             collision(pos, trans, go.pos, go.trans)
         );
 
         if (tag === EntityTag.PLAYER) {
-          if (newPosX < 2 || newPosX > width - 2 - trans.width) newPosX = pos.x;
-          if (newPosY < 2 || newPosY > height - 2 - trans.height)
-            newPosY = pos.y;
+          if (collisions.find((go) => go.status === EntityStatus.ENEMY)) {
+            // Player hit by enemy
+            health.curr -= 1;
+            AUDIO_MANAGER.playClip("hitHurt");
+            // collisions timeout
+            col.enabled = false;
+            setTimeout(() => (col.enabled = true), 1000);
+
+            if (health.curr < 1) {
+              //Player died
+              dir.x = 0;
+              dir.y = 0;
+              this.ecs.removeComponent(entity, InputListener);
+              if (anim?.animations?.death) {
+                anim.setState("death");
+              }
+              setTimeout(() => {
+                spawnPlayer(
+                  this.ecs,
+                  this.canvas.width / 2,
+                  this.canvas.height - 50
+                );
+              }, 2000);
+            }
+          }
         }
 
         if (tag === EntityTag.ENEMY) {
@@ -81,13 +111,19 @@ export default class CollisionSystem extends System {
           );
           if (isOOB(newPosX, newPosY, width, height, 10) || target) {
             if (target) {
-              if (target.anim?.animations?.death) {
-                this.ecs.removeComponent(target.entity, Collider);
-                target.anim.setState("death");
+              if (target?.health?.curr) {
+                target.health.curr -= 1;
+                AUDIO_MANAGER.playClip("hitHurtEnemy");
               } else {
-                this.ecs.removeEntity(target.entity);
+                // Target dies
+                if (target.anim?.animations?.death) {
+                  target.col.enabled = false;
+                  target.anim.setState("death");
+                } else {
+                  this.ecs.removeEntity(target.entity);
+                }
+                AUDIO_MANAGER.playClip("explosion");
               }
-              AUDIO_MANAGER.playClip("explosion");
             }
             // console.log("Removing bullet");
             this.ecs.removeEntity(entity);
