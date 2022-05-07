@@ -17,6 +17,7 @@ const INPUT = {
   LEFT: ["a", "arrowleft"],
   RIGHT: ["d", "arrowright"],
   ACTION1: [" "],
+  MENU: ["escape"]
 };
 
 export default class PlayerInputSystem extends System {
@@ -35,6 +36,11 @@ export default class PlayerInputSystem extends System {
       let transform = comps.get(Transform);
       let animations = comps.get(Animations);
       let guns = comps.get(GunInventory);
+
+      // Open menu
+      if(keyPress("MENU")) GAMESTATE.paused = !GAMESTATE.paused
+
+      if(GAMESTATE.paused) return;
 
       // Static movement, no acceleration
       if (keyPress("UP") || (!keyDown("DOWN") && keyDown("UP"))) dir.y = -1;

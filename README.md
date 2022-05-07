@@ -20,11 +20,12 @@ An ECS driven shoot-em-up game a created using vanilla canvas.
 - [x] Basic enemy movement patterns
 - [x] Player damage
 - [x] Health system
+- [ ] Pausing
+- [ ] Lives system
+- [ ] Global gamestate with lives, score, level, game status etc.
 - [ ] Way to reset and restart the game without refreshing
 - [ ] Enemy attacks
 - [ ] Enemy hit animation
-- [ ] Mouse input
-- [ ] Pausing
 - [ ] Score and win conditions
 - [ ] HUD, Menu and a Title screen
     - [ ] UI Renderer system
@@ -38,5 +39,6 @@ An ECS driven shoot-em-up game a created using vanilla canvas.
 - [ ] More levels
 
 ### Nice-to-have
+- [ ] Mouse input
 - [ ] Level editor
 - [ ] Advanced movement patterns: eg. Pathfinding from point to point

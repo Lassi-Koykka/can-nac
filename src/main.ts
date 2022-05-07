@@ -115,6 +115,18 @@ window.addEventListener("focus", () => resetKeymap());
 
   Object.values(SYSTEMS).forEach((sys) => ecs.addSystem(sys));
 
+  // --- GAMESTATE ---
+  globalThis.GAMESTATE = {
+    level: 1,
+    paused: false,
+    scene: "menu",
+    lives: 3,
+    score: 0
+  }
+
+  const pause = () => {
+  }
+
   spawnPlayer(ecs, canvas.width / 2, canvas.height - 30);
 
   // --- ANIMATION PROPERTIES ---
@@ -130,6 +142,17 @@ window.addEventListener("focus", () => resetKeymap());
     requestAnimationFrame(loop);
     const delta = t - lastTime;
     if(delta <= nextFrame) return
+
+    // PAUSE GAME
+    [
+      "autofireSystem",
+      "collisionSystem",
+      "enemySpawnerSystem",
+      "animationSystem"
+    ].forEach(s => {
+      const sys = SYSTEMS[s]
+      if(sys && sys.enabled === GAMESTATE.paused) sys.enabled = !GAMESTATE.paused
+    })
 
     lastTime = t;
     ctx.clearRect(0, 0, canvas.width, canvas.height);

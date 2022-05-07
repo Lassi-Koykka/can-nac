@@ -3,15 +3,18 @@ import { FireMode } from "./enums";
 
 // Global types
 declare global {
+  var GAMESTATE: GameState;
   var KEYMAP: Keymap;
   var KEYMAP_PREV: Keymap;
   var AUDIO_MANAGER: IAudioManager;
-  var SYSTEMS: { [name: string]: System}
+  var SYSTEMS: { [name: string]: System};
+  var restart: () => void
 }
 
 export interface GameState {
-  state: "running" | "paused";
   scene: "menu" | "game";
+  level: number;
+  paused: boolean;
   score: number;
   lives: number;
 }

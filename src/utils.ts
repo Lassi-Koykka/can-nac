@@ -141,3 +141,4 @@ export const getDirKey = (dir: { x: number; y: number }) => {
   else if (x < 0 && y > 0) return "SW";
   return "default";
 };
+

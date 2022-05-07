@@ -39,7 +39,7 @@ export default class RenderingSystem extends System {
   stars: Entity[] = [];
   lastStarSpawn: number = 0;
   starSpeeds = [80, 100, 130, 220];
-  starColors = ["#a4e4fc", "#b8f8d8", "#fcfcfc"]
+  starColors = ["#a4e4fc", "#b8f8d8", "#fcfcfc"];
 
   backgroundYOffset = 0;
   backgroundMoveSpeed = 250;
@@ -98,55 +98,48 @@ export default class RenderingSystem extends System {
       this.backgroundYOffset = 2;
     }
 
-    this.drawStars()
+    this.drawStars();
   }
 
   drawStars() {
     const ctx = this.ctx;
     const now = new Date().getTime();
-    if (now - this.lastStarSpawn > 50) {
+    if (!GAMESTATE.paused && now - this.lastStarSpawn > 50) {
       const newStar = this.ecs.addEntity();
       const x = randomInt(1, this.canvasWidth);
-      const distanceIdx = randomInt(0, this.starSpeeds.length)
+      const distanceIdx = randomInt(0, this.starSpeeds.length);
       const speed = this.starSpeeds[distanceIdx];
-      const size = 1
+      const size = 1;
       const components: Component[] = [
         new Position(x, -5),
         new Transform(size, size),
         new Speed(speed),
         new Direction(0, 1),
       ];
-      components.forEach((c) =>
-        this.ecs.addComponent(newStar, c)
-      );
+      components.forEach((c) => this.ecs.addComponent(newStar, c));
       this.lastStarSpawn = now;
       this.stars.push(newStar);
     }
     this.stars.forEach((e) => {
       const comps = this.ecs.getComponents(e);
       const pos = comps.get(Position);
-      const {width} = comps.get(Transform);
+      const { width } = comps.get(Transform);
 
-      if(pos.y > this.canvasHeight) {
-        this.stars = this.stars.filter(s => s !== e)
-        this.ecs.removeEntity(e)
-        return
+      if (pos.y > this.canvasHeight) {
+        this.stars = this.stars.filter((s) => s !== e);
+        this.ecs.removeEntity(e);
+        return;
       }
 
       ctx.save();
-      const color = this.starColors[pos.x % this.starColors.length]
+      const color = this.starColors[pos.x % this.starColors.length];
       ctx.strokeStyle = color;
       ctx.fillStyle = color;
       ctx.beginPath();
-      ctx.fillRect(
-        Math.round(pos.x),
-        Math.round(pos.y),
-        width,
-        width
-      );
-      if(width >= 3) {
-        ctx.fillStyle = "#fcfcfc"
-        ctx.fillRect(Math.round(pos.x) + 1, Math.round(pos.y) + 1, 1, 1)
+      ctx.fillRect(Math.round(pos.x), Math.round(pos.y), width, width);
+      if (width >= 3) {
+        ctx.fillStyle = "#fcfcfc";
+        ctx.fillRect(Math.round(pos.x) + 1, Math.round(pos.y) + 1, 1, 1);
       }
       ctx.restore();
     });
@@ -266,8 +259,8 @@ export default class RenderingSystem extends System {
   }
 
   drawHUD(delta: number) {
-    // DrawFPS
-    this.drawText("FPS:" + Math.round(1 / delta), this.canvasWidth, 0, {
+    // Draw FPS
+    false && this.drawText("FPS:" + Math.round(1 / delta), this.canvasWidth, 0, {
       horizontalAlign: Align.END,
       verticalAlign: Align.START,
       color: "red",
@@ -277,13 +270,26 @@ export default class RenderingSystem extends System {
         offsetY: 0,
       },
     });
+
+    // Draw pause menu
+    if (GAMESTATE.paused) {
+      this.drawText("PAUSED", this.canvasWidth / 2, this.canvasHeight / 2 - 30, {
+        horizontalAlign: Align.CENTER,
+        verticalAlign: Align.CENTER,
+        shadow: {
+          color: "red",
+          offsetX: 1,
+          offsetY: 1,
+        },
+      });
+    }
   }
 
   public update(entities: Set<Entity>, delta: number): void {
     // DRAW MENU IF GAMESTATE IS NOT RUNNING
 
     // DRAW BACKGROUND
-    this.drawStars()
+    this.drawStars();
     // this.drawBackground(delta);
 
     // DRAW ENTITIES
