@@ -21,17 +21,36 @@ export type enemyType = "large1" | "small1" | "small2" | "small3" | "small4"
 const enemy_type_comps = (enemytype: enemyType): Component[] => {
   switch (enemytype) {
   case "large1": return [
-    new Speed(20),
-    new Health(3, 3),
+    new Speed(45),
+    new Health(5, 5),
     new Transform(28, 28),
     new Sprite(SpriteType.SPRITE, "blue", {x:28, y:56}),
     new Animations({
       default: createAnimation([{ x:28, y:56 }]),
       death: animations.explosion_large,
-    })
+    }),
+    new MovementPattern(MovementPatternType.FOLLOW),
+    new AutofireGun(
+      {
+        fireMode: FireMode.AUTO,
+        fireRate: 60,
+        damage: 1,
+        bulletType: "laser",
+        bullets: [
+          {dirX: 0, dirY: -1, offsetX: 0, offsetY: -14},
+          {dirX: 1, dirY: 0, offsetX: 14, offsetY: 0},
+          {dirX: 0, dirY: 1, offsetX: 0, offsetY: 14},
+          {dirX: -1, dirY: 0, offsetX: -14, offsetY: 0},
+        ]
+      },
+      {
+        x: 14,
+        y: 14
+      }
+    ),
   ]
   case "small1": return [
-    new Speed(120),
+    new Speed(150),
     new Health(1, 1),
     new Transform(14, 14),
     new Sprite(SpriteType.SPRITE, "blue", {x:0, y:56}),
@@ -76,7 +95,23 @@ const enemy_type_comps = (enemytype: enemyType): Component[] => {
     new Animations({
       default: createAnimation([{ x:0, y:70 }]),
       death: animations.explosion_small,
-    })
+    }),
+    new AutofireGun(
+      {
+        fireMode: FireMode.AUTO,
+        fireRate: 60,
+        damage: 1,
+        bulletType: "laser",
+        bullets: [
+          {dirX: 1, dirY: 0, offsetX: 7, offsetY: 0},
+          {dirX: -1, dirY: 0, offsetX: -7, offsetY: 0},
+        ]
+      },
+      {
+        x: 7,
+        y: 8
+      }
+    ),
   ]
   case "small4":
   return [

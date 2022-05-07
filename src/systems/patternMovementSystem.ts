@@ -1,16 +1,13 @@
 import {Direction, MovementPattern, Position} from "../components";
 import {Entity, System} from "../ecs";
 import {MovementPatternType} from "../enums";
+import {normalizeVector} from "../utils";
 
 export default class PatternMovementSystem extends System {
   componentsRequired = new Set<Function>([ Direction, MovementPattern ]);
-  canvasWidth: number;
-  canvasHeight: number;
 
-  constructor(canvas: HTMLCanvasElement){
+  constructor(){
     super();
-    this.canvasWidth = canvas.width
-    this.canvasHeight = canvas.height
   }
 
   public update(entities: Set<Entity>, _: number): void {
@@ -28,8 +25,22 @@ export default class PatternMovementSystem extends System {
         if(pos.y > 5) {
           dir.y = 0
           if(pos.x < 0) dir.x = 1
-          else if (pos.x > this.canvasWidth - 14) dir.x = -1
+          else if (pos.x > canvas.width - 14) dir.x = -1
           else if (dir.x === 0) dir.x = Math.random() > 0.5 ? -1 : 1
+        }
+      } else if(pattern.type === MovementPatternType.FOLLOW) {
+        const playerComps = this.ecs.getComponents(GAMESTATE.playerEntity);
+        if(playerComps) {
+          const playerPos = playerComps.get(Position);
+          const tempX = playerPos.x - pos.x;
+          const tempY = playerPos.y - pos.y;
+
+          const newDir = normalizeVector({x: tempX, y: tempY});
+          dir.x = newDir.x;
+          dir.y = newDir.y;
+        } else {
+          dir.x = 0;
+          dir.y = pos.x > 0 ? -1 : 0;
         }
       }
     })

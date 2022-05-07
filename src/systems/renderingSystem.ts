@@ -1,15 +1,8 @@
-import {
-  Collider,
-  Direction,
-  Position,
-  Speed,
-  Sprite,
-  Transform,
-} from "../components";
+import { Direction, Health, Position, Speed, Sprite, Tag, Transform } from "../components";
 import { Component, Entity, System } from "../ecs";
-import { Align, ColliderType, SpriteType } from "../enums";
+import { Align, EntityTag, SpriteType } from "../enums";
 import { IFont } from "../types";
-import { clamp, getDirKey, getOrigin, randomInt } from "../utils";
+import { getDirKey, getOrigin, randomInt } from "../utils";
 
 interface IDrawTextOptions<T = undefined> {
   font?: IFont;
@@ -29,8 +22,6 @@ export default class RenderingSystem extends System {
 
   // PROPERTIES
   ctx: CanvasRenderingContext2D;
-  canvasWidth: number;
-  canvasHeight: number;
 
   // Assets
   spritesheet: HTMLImageElement;
@@ -46,7 +37,6 @@ export default class RenderingSystem extends System {
 
   constructor(
     ctx: CanvasRenderingContext2D,
-    canvas: HTMLCanvasElement,
     assets: {
       spritesheetImg: HTMLImageElement;
       backgroundImg: HTMLImageElement;
@@ -55,8 +45,6 @@ export default class RenderingSystem extends System {
   ) {
     super();
     this.ctx = ctx;
-    this.canvasWidth = canvas.width;
-    this.canvasHeight = canvas.height;
     this.spritesheet = assets.spritesheetImg;
     this.background = assets.backgroundImg;
     this.fonts = fonts;
@@ -66,35 +54,35 @@ export default class RenderingSystem extends System {
     const ctx = this.ctx;
 
     const backgroundY = Math.round(
-      this.background.naturalHeight - this.canvasHeight - this.backgroundYOffset
+      this.background.naturalHeight - canvas.height - this.backgroundYOffset
     );
     if (backgroundY < 0) {
       ctx.drawImage(
         this.background,
         0,
         this.background.naturalHeight - Math.abs(backgroundY) - 2,
-        this.canvasWidth,
-        this.canvasHeight,
+        canvas.width,
+        canvas.height,
         0,
         0,
-        this.canvasWidth,
-        this.canvasHeight
+        canvas.width,
+        canvas.height
       );
     }
     ctx.drawImage(
       this.background,
       0,
       backgroundY,
-      this.canvasWidth,
-      this.canvasHeight,
+      canvas.width,
+      canvas.height,
       0,
       0,
-      this.canvasWidth,
-      this.canvasHeight
+      canvas.width,
+      canvas.height
     );
     this.backgroundYOffset += this.backgroundMoveSpeed * delta;
 
-    if (backgroundY <= -this.canvasHeight) {
+    if (backgroundY <= -canvas.height) {
       this.backgroundYOffset = 2;
     }
 
@@ -106,7 +94,7 @@ export default class RenderingSystem extends System {
     const now = new Date().getTime();
     if (!GAMESTATE.paused && now - this.lastStarSpawn > 50) {
       const newStar = this.ecs.addEntity();
-      const x = randomInt(1, this.canvasWidth);
+      const x = randomInt(1, canvas.width);
       const distanceIdx = randomInt(0, this.starSpeeds.length);
       const speed = this.starSpeeds[distanceIdx];
       const size = 1;
@@ -122,10 +110,16 @@ export default class RenderingSystem extends System {
     }
     this.stars.forEach((e) => {
       const comps = this.ecs.getComponents(e);
+
+      if(!comps) {
+        this.stars = this.stars.filter(ent => ent !== e)
+        return;
+      }
+
       const pos = comps.get(Position);
       const { width } = comps.get(Transform);
 
-      if (pos.y > this.canvasHeight) {
+      if (pos.y > canvas.height) {
         this.stars = this.stars.filter((s) => s !== e);
         this.ecs.removeEntity(e);
         return;
@@ -153,6 +147,8 @@ export default class RenderingSystem extends System {
       const pos = comps.get(Position);
       const sprite = comps.get(Sprite);
       const transform = comps.get(Transform);
+      const health = comps.get(Health);
+      const tag = comps.get(Tag);
       const dir = comps.get(Direction);
       const { x: drawX, y: drawY } = getOrigin(pos, transform);
       if (sprite.spriteType === SpriteType.SPRITE) {
@@ -195,6 +191,15 @@ export default class RenderingSystem extends System {
           transform.height
         );
         ctx.restore();
+      }
+      if(!GAMESTATE.paused && tag?.value === EntityTag.PLAYER) {
+        for (let i = 0; i < health.curr * 3; i += 3) {
+          ctx.save();
+          ctx.fillStyle = "#a81000"
+          ctx.fillRect(pos.x + 10 + i, pos.y + transform.height + 1, 2, 2)
+          ctx.restore();
+        }
+
       }
     });
   }
@@ -256,33 +261,95 @@ export default class RenderingSystem extends System {
       );
     });
     ctx.restore();
+    return { w: textWidth, h: textHeight };
   }
 
   drawHUD(delta: number) {
-    // Draw FPS
-    false && this.drawText("FPS:" + Math.round(1 / delta), this.canvasWidth, 0, {
-      horizontalAlign: Align.END,
+    // Draw pause menu
+    const pauseTextLocation = {
+        x: canvas.width / 2,
+        y: canvas.height / 2 - 30
+    }
+    let pauseTextSize: {w: number, h: number}
+    if (GAMESTATE.paused && GAMESTATE.scene !== "menu") {
+      pauseTextSize = this.drawText(
+        GAMESTATE.scene === "game" ? "PAUSED" : "GAME OVER",
+        pauseTextLocation.x,
+        pauseTextLocation.y,
+        {
+          horizontalAlign: Align.CENTER,
+          verticalAlign: Align.CENTER,
+          shadow: {
+            color: "#a80020",
+            offsetX: 1,
+            offsetY: 1,
+          },
+        }
+      );
+    }
+
+    // Draw score
+    const scoreTextLocation = GAMESTATE.paused ? {x: Math.floor(canvas.width / 2 - pauseTextSize!.w / 2), y: pauseTextLocation.y + 16 } : {x: 2, y: 2}
+    const scoreTextSize = this.drawText(GAMESTATE.score.toString() + `${GAMESTATE.paused ? " PTS" : ""}`, scoreTextLocation.x, scoreTextLocation.y, {
+      horizontalAlign: Align.START,
       verticalAlign: Align.START,
       color: "red",
       shadow: {
-        color: "red",
+        color: "#0058f8",
         offsetX: 1,
         offsetY: 0,
       },
     });
 
-    // Draw pause menu
-    if (GAMESTATE.paused) {
-      this.drawText("PAUSED", this.canvasWidth / 2, this.canvasHeight / 2 - 30, {
-        horizontalAlign: Align.CENTER,
-        verticalAlign: Align.CENTER,
+    const livesText = GAMESTATE.paused 
+      ? GAMESTATE.lives + " ships"
+      : Array(GAMESTATE.lives > 0 ? GAMESTATE.lives : 0).fill("♥").join("")
+    // Draw lives
+    GAMESTATE.scene === "game" && this.drawText(
+      livesText,
+      scoreTextLocation.x,
+      scoreTextLocation.y + scoreTextSize.h + 2,
+      {
+        horizontalAlign: Align.START,
+        verticalAlign: Align.START,
+        color: "red",
         shadow: {
-          color: "red",
+          color: "#a80020",
           offsetX: 1,
-          offsetY: 1,
+          offsetY: 0,
+        },
+      }
+    );
+
+    if (GAMESTATE.paused && GAMESTATE.scene !== "menu") {
+      this.drawText(
+        "PRESS R TO RESTART",
+        canvas.width / 2,
+        canvas.height - 50,
+        {
+          horizontalAlign: Align.CENTER,
+          verticalAlign: Align.CENTER,
+          shadow: {
+            color: "#00b800",
+            offsetX: 1,
+            offsetY: 1,
+          },
+        }
+      );
+    }
+
+    // Draw FPS
+    false &&
+      this.drawText("FPS:" + Math.round(1 / delta), canvas.width, 0, {
+        horizontalAlign: Align.END,
+        verticalAlign: Align.START,
+        color: "red",
+        shadow: {
+          color: "#a80020",
+          offsetX: 1,
+          offsetY: 0,
         },
       });
-    }
   }
 
   public update(entities: Set<Entity>, delta: number): void {

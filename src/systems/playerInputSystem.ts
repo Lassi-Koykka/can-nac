@@ -8,17 +8,10 @@ import {
 } from "../components";
 import { Entity, System } from "../ecs";
 import { shoot } from "../entities/bullet";
+import {spawnPlayer} from "../entities/player";
 import { EntityStatus, FireMode } from "../enums";
+import { keyDown, keyPress } from "../input";
 import { normalizeVector } from "../utils";
-
-const INPUT = {
-  UP: ["w", "arrowup"],
-  DOWN: ["s", "arrowdown"],
-  LEFT: ["a", "arrowleft"],
-  RIGHT: ["d", "arrowright"],
-  ACTION1: [" "],
-  MENU: ["escape"]
-};
 
 export default class PlayerInputSystem extends System {
   componentsRequired = new Set<Function>([
@@ -28,7 +21,8 @@ export default class PlayerInputSystem extends System {
     Direction,
     GunInventory,
   ]);
-  public update(entities: Set<Entity>, _: number): void {
+
+  updateListeners(entities: Set<number>) {
     entities.forEach((e) => {
       const comps = this.ecs.getComponents(e);
       let dir = comps.get(Direction);
@@ -36,11 +30,6 @@ export default class PlayerInputSystem extends System {
       let transform = comps.get(Transform);
       let animations = comps.get(Animations);
       let guns = comps.get(GunInventory);
-
-      // Open menu
-      if(keyPress("MENU")) GAMESTATE.paused = !GAMESTATE.paused
-
-      if(GAMESTATE.paused) return;
 
       // Static movement, no acceleration
       if (keyPress("UP") || (!keyDown("DOWN") && keyDown("UP"))) dir.y = -1;
@@ -81,13 +70,24 @@ export default class PlayerInputSystem extends System {
       }
     });
   }
-}
 
-const keyDown = (input: keyof typeof INPUT) =>
-  INPUT[input].some((key) => KEYMAP[key]);
-const keyPress = (input: keyof typeof INPUT) =>
-  INPUT[input].some((key) => KEYMAP[key]) &&
-  INPUT[input].every((key) => !KEYMAP_PREV[key]);
-const keyUp = (input: keyof typeof INPUT) =>
-  INPUT[input].some((key) => !KEYMAP[key]) &&
-  INPUT[input].every((key) => KEYMAP_PREV[key]);
+  public update(entities: Set<Entity>, _: number): void {
+    // Open menu
+    if (keyPress("MENU") && GAMESTATE.scene === "game")
+      GAMESTATE.paused = !GAMESTATE.paused;
+    if (keyPress("RESTART") && GAMESTATE.paused) {
+      this.ecs.removeAllEntities()
+      const p = spawnPlayer(this.ecs)
+      GAMESTATE = {
+        paused: false,
+        scene: "game",
+        playerEntity: p,
+        lives: 3,
+        score: 0
+      }
+    }
+
+    // handle in-game listeners
+    if (!GAMESTATE.paused && GAMESTATE.scene === "game") this.updateListeners(entities);
+  }
+}

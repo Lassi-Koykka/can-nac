@@ -1,6 +1,7 @@
 import {
   Animations,
   Collider,
+  Damage,
   Direction,
   Health,
   InputListener,
@@ -16,16 +17,14 @@ import { EntityStatus, EntityTag } from "../enums";
 import { getOrigin } from "../utils";
 
 export default class CollisionSystem extends System {
-  canvas: HTMLCanvasElement;
   componentsRequired = new Set<Function>([Position, Direction, Speed]);
 
-  constructor(canvas: HTMLCanvasElement) {
+  constructor() {
     super();
-    this.canvas = canvas;
   }
 
   public update(entities: Set<Entity>, delta: number): void {
-    const { height, width } = this.canvas;
+    const { height, width } = canvas;
 
     const gameObjects = Array.from(entities).map((e) => {
       const comps = this.ecs.getComponents(e);
@@ -41,6 +40,7 @@ export default class CollisionSystem extends System {
         col: comps.get(Collider),
         trans: comps.get(Transform),
         anim: comps.get(Animations),
+        damage: comps.get(Damage),
       };
     });
 
@@ -67,9 +67,14 @@ export default class CollisionSystem extends System {
         );
 
         if (tag === EntityTag.PLAYER) {
-          if (collisions.find((go) => go.status === EntityStatus.ENEMY)) {
+          const enemyCollision = collisions.find(
+            (go) => go.status === EntityStatus.ENEMY
+          );
+          if (enemyCollision) {
             // Player hit by enemy
-            health.curr -= 1;
+            health.curr -= enemyCollision.damage
+              ? enemyCollision.damage.value
+              : 1;
             AUDIO_MANAGER.playClip("hitHurt");
             // collisions timeout
             col.enabled = false;
@@ -77,19 +82,21 @@ export default class CollisionSystem extends System {
 
             if (health.curr < 1) {
               //Player died
+              GAMESTATE.lives -= 1;
               dir.x = 0;
               dir.y = 0;
               this.ecs.removeComponent(entity, InputListener);
               if (anim?.animations?.death) {
                 anim.setState("death");
               }
-              setTimeout(() => {
-                spawnPlayer(
-                  this.ecs,
-                  this.canvas.width / 2,
-                  this.canvas.height - 50
-                );
-              }, 2000);
+              if (GAMESTATE.lives > 0) {
+                setTimeout(() => {
+                  spawnPlayer(this.ecs);
+                }, 2000);
+              } else {
+                GAMESTATE.paused = true;
+                GAMESTATE.scene = "gameOver";
+              }
             }
           }
         }
@@ -123,6 +130,7 @@ export default class CollisionSystem extends System {
                   this.ecs.removeEntity(target.entity);
                 }
                 AUDIO_MANAGER.playClip("explosion");
+                GAMESTATE.score += target.health.max * 10;
               }
             }
             // console.log("Removing bullet");

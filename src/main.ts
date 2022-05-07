@@ -13,7 +13,7 @@ import {IFont} from "./types";
 import { indexChars, loadAudioClips, loadImage } from "./utils";
 
 // --- Canvas ---
-const canvas = document.querySelector<HTMLCanvasElement>("#gameCanvas")!;
+globalThis.canvas = document.querySelector<HTMLCanvasElement>("#gameCanvas")!;
 canvas.tabIndex = 1;
 
 // --- Context ---
@@ -89,7 +89,7 @@ window.addEventListener("focus", () => resetKeymap());
   const fonts: {[key: string]: IFont} = {
     "default": {
       img: defaultFontImg,
-      characterIndexes: indexChars("abcdefghijklmnopqrstuvwxyz0123456789.!-:"),
+      characterIndexes: indexChars("abcdefghijklmnopqrstuvwxyz0123456789.!-:♥"),
       charWidth: 9,
       charHeight: 11,
       caseSensitive: false
@@ -98,14 +98,15 @@ window.addEventListener("focus", () => resetKeymap());
 
   // --- INITIALIZE ECS ---
   const ecs = new ECS();
+
   globalThis.SYSTEMS = {
     inputSystem: new PlayerInputSystem(),
     autofireSystem: new AutofireSystem(),
-    movementPatternSystem: new PatternMovementSystem(canvas),
-    collisionSystem: new CollisionSystem(canvas),
-    enemySpawnerSystem: new EnemySpawnerSystem(canvas.width, 3),
+    movementPatternSystem: new PatternMovementSystem(),
+    collisionSystem: new CollisionSystem(),
+    enemySpawnerSystem: new EnemySpawnerSystem(3),
     animationSystem: new AnimationSystem(),
-    renderingSystem: new RenderingSystem(ctx, canvas, {
+    renderingSystem: new RenderingSystem(ctx, {
       backgroundImg,
       spritesheetImg,
     },
@@ -117,17 +118,14 @@ window.addEventListener("focus", () => resetKeymap());
 
   // --- GAMESTATE ---
   globalThis.GAMESTATE = {
-    level: 1,
-    paused: false,
-    scene: "menu",
+    playerEntity: -1,
+    paused: true,
+    scene: "game",
     lives: 3,
     score: 0
   }
 
-  const pause = () => {
-  }
-
-  spawnPlayer(ecs, canvas.width / 2, canvas.height - 30);
+  spawnPlayer(ecs);
 
   // --- ANIMATION PROPERTIES ---
   let lastTime = 0;
@@ -153,6 +151,7 @@ window.addEventListener("focus", () => resetKeymap());
       const sys = SYSTEMS[s]
       if(sys && sys.enabled === GAMESTATE.paused) sys.enabled = !GAMESTATE.paused
     })
+  
 
     lastTime = t;
     ctx.clearRect(0, 0, canvas.width, canvas.height);

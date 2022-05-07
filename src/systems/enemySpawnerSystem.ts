@@ -5,16 +5,14 @@ import {EntityTag} from "../enums";
 import {randomInt} from "../utils";
 
 export default class EnemySpawnerSystem extends System {
-  width: number
-  maxEnemyCount: number
+  baseMaxEnemyCount: number
   spawnCooldown: number
   lastSpawn: number = 0
   componentsRequired = new Set<Function>([Position, Status, Tag]);
 
-  constructor(width: number, maxEnemyCount: number, spawnCooldown: number = 1.5) {
+  constructor(maxEnemyCount: number, spawnCooldown: number = 1.5) {
     super()
-    this.width = width
-    this.maxEnemyCount = maxEnemyCount
+    this.baseMaxEnemyCount = maxEnemyCount
     this.spawnCooldown = spawnCooldown * 1000;
   }
 
@@ -28,17 +26,15 @@ export default class EnemySpawnerSystem extends System {
       return false
     }).length; 
 
-    // console.log("currEnemyCount", currEnemyCount, now, "-", this.lastSpawn, "=", now - this.lastSpawn)
-    if(currEnemyCount < this.maxEnemyCount && now - this.lastSpawn > this.spawnCooldown ) {
+    if(currEnemyCount < this.baseMaxEnemyCount + Math.floor(GAMESTATE.score / 75) && now - this.lastSpawn > this.spawnCooldown ) {
       const enemyList: enemyType[] = ["large1", "small1", "small2", "small3", "small4"]
       // const enemyList: enemyType[] = ["small2"]
       const rndEnemy = enemyList[Math.floor(Math.random() * (enemyList.length))]
-      let spawnX = randomInt(0, this.width - 28)
+      let spawnX = randomInt(0, canvas.width - 28)
       let spawnY = -28
 
       spawnEnemy(this.ecs, spawnX, spawnY, rndEnemy)
       this.lastSpawn = now
-
     }
 
   }

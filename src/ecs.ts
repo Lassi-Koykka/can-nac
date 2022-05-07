@@ -46,6 +46,9 @@ export class ECS {
     public removeEntity(entity: Entity): void {
         this.entitiesToDestroy.push(entity);
     }
+    public removeAllEntities(): void {
+        this.entities.forEach((_, e) => this.destroyEntity(e))
+    }
     private destroyEntity(entity: Entity): void {
         this.entities.delete(entity);
         for (let entities of this.systems.values()) {

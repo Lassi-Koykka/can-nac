@@ -10,6 +10,7 @@ An ECS driven shoot-em-up game a created using vanilla canvas.
 - [x] Fix bullet Sprites
 - [x] Directional sprites
 - [x] Background layers
+- [ ] Fix sideways laser sprite
 
 ### Systems and mechanics
 
@@ -20,15 +21,17 @@ An ECS driven shoot-em-up game a created using vanilla canvas.
 - [x] Basic enemy movement patterns
 - [x] Player damage
 - [x] Health system
-- [ ] Pausing
-- [ ] Lives system
-- [ ] Global gamestate with lives, score, level, game status etc.
-- [ ] Way to reset and restart the game without refreshing
-- [ ] Enemy attacks
+- [x] Pausing
+- [x] Way to reset and restart the game without refreshing
+- [x] Lives system
+- [x] Enemy attacks
+- [x] Score
+- [x] HUD
+- [x] Health indicator
+- [x] Rising difficulty
+- [ ] Weapon pickups / switching
 - [ ] Enemy hit animation
-- [ ] Score and win conditions
-- [ ] HUD, Menu and a Title screen
-    - [ ] UI Renderer system
+- [ ] Title screen
 
 ### Content
 
@@ -36,9 +39,12 @@ An ECS driven shoot-em-up game a created using vanilla canvas.
 - [x] More bullet types
     - [ ] Sideways laser
 - [ ] More guns
+    - [ ] Weapon levels
 - [ ] More levels
 
 ### Nice-to-have
+- [ ] Alternate gamemodes
+- [ ] Win conditions
 - [ ] Mouse input
 - [ ] Level editor
 - [ ] Advanced movement patterns: eg. Pathfinding from point to point

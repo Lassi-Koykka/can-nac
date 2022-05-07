@@ -14,11 +14,12 @@ import {
 } from "../components";
 import { Component, ECS } from "../ecs";
 import {ColliderType, EntityTag, FireMode, SpriteType} from "../enums";
-import { createAnimation, rotateVector } from "../utils";
+import { rotateVector } from "../utils";
 
 const vecToDir = ({x,y}: {x: number, y: number}) => ({dirX: x, dirY: y})
-export const spawnPlayer = (ecs: ECS, x: number, y: number) => {
+export const spawnPlayer = (ecs: ECS, x: number = canvas.width / 2 - 14, y: number = canvas.height - 50) => {
   const player = ecs.addEntity();
+  GAMESTATE.playerEntity = player
   const components: Component[] = [
     new InputListener(),
     new Position(x, y),
@@ -29,6 +30,16 @@ export const spawnPlayer = (ecs: ECS, x: number, y: number) => {
     new Speed(120),
     new Health(3, 3),
     new GunInventory([
+      {
+        fireMode: FireMode.AUTO,
+        fireRate: 300,
+        damage: 1,
+        bulletType: "default",
+        bullets: [
+          {dirX: 0, dirY: -1, offsetX: -7, offsetY: 7},
+          {dirX: 0, dirY: -1, offsetX: 7, offsetY: 7},
+          ]
+      },
       {
         fireMode: FireMode.AUTO,
         fireRate: 300,

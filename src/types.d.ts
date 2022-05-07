@@ -8,12 +8,13 @@ declare global {
   var KEYMAP_PREV: Keymap;
   var AUDIO_MANAGER: IAudioManager;
   var SYSTEMS: { [name: string]: System};
+  var canvas: HTMLCanvasElement;
   var restart: () => void
 }
 
 export interface GameState {
-  scene: "menu" | "game";
-  level: number;
+  scene: "menu" | "game" | "gameOver";
+  playerEntity: number;
   paused: boolean;
   score: number;
   lives: number;
