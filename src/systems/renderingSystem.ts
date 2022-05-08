@@ -1,7 +1,16 @@
-import { Direction, Health, Position, Speed, Sprite, Tag, Transform } from "../components";
+import {
+  Direction,
+  GunInventory,
+  Health,
+  Position,
+  Speed,
+  Sprite,
+  Tag,
+  Transform,
+} from "../components";
 import { Component, Entity, System } from "../ecs";
 import { Align, EntityTag, SpriteType } from "../enums";
-import { IFont } from "../types";
+import { IFont, IStar } from "../types";
 import { getDirKey, getOrigin, randomInt } from "../utils";
 
 interface IDrawTextOptions<T = undefined> {
@@ -26,116 +35,73 @@ export default class RenderingSystem extends System {
   // Assets
   spritesheet: HTMLImageElement;
   background: HTMLImageElement;
+  title: HTMLImageElement;
   fonts: { [name: string]: IFont };
-  stars: Entity[] = [];
+  stars: IStar[] = [];
   lastStarSpawn: number = 0;
   starSpeeds = [80, 100, 130, 220];
   starColors = ["#a4e4fc", "#b8f8d8", "#fcfcfc"];
 
-  backgroundYOffset = 0;
-  backgroundMoveSpeed = 250;
+  // Title stuff
+  titleScreenPos = -200;
+  startGameTextShow = false;
 
   constructor(
     ctx: CanvasRenderingContext2D,
     assets: {
       spritesheetImg: HTMLImageElement;
-      backgroundImg: HTMLImageElement;
+      titleImg: HTMLImageElement;
     },
     fonts: { [name: string]: IFont }
   ) {
     super();
     this.ctx = ctx;
     this.spritesheet = assets.spritesheetImg;
-    this.background = assets.backgroundImg;
+    this.title = assets.titleImg;
     this.fonts = fonts;
+    setInterval(() => this.startGameTextShow = !this.startGameTextShow, 750)
   }
 
-  drawBackground(delta: number) {
-    const ctx = this.ctx;
-
-    const backgroundY = Math.round(
-      this.background.naturalHeight - canvas.height - this.backgroundYOffset
-    );
-    if (backgroundY < 0) {
-      ctx.drawImage(
-        this.background,
-        0,
-        this.background.naturalHeight - Math.abs(backgroundY) - 2,
-        canvas.width,
-        canvas.height,
-        0,
-        0,
-        canvas.width,
-        canvas.height
-      );
-    }
-    ctx.drawImage(
-      this.background,
-      0,
-      backgroundY,
-      canvas.width,
-      canvas.height,
-      0,
-      0,
-      canvas.width,
-      canvas.height
-    );
-    this.backgroundYOffset += this.backgroundMoveSpeed * delta;
-
-    if (backgroundY <= -canvas.height) {
-      this.backgroundYOffset = 2;
-    }
-
-    this.drawStars();
-  }
-
-  drawStars() {
+  drawStars(delta: number) {
     const ctx = this.ctx;
     const now = new Date().getTime();
-    if (!GAMESTATE.paused && now - this.lastStarSpawn > 50) {
-      const newStar = this.ecs.addEntity();
+    if (
+      (!GAMESTATE.paused || GAMESTATE.scene === "titleScreen") &&
+      now - this.lastStarSpawn > 50
+    ) {
+      const id = now;
       const x = randomInt(1, canvas.width);
       const distanceIdx = randomInt(0, this.starSpeeds.length);
       const speed = this.starSpeeds[distanceIdx];
       const size = 1;
-      const components: Component[] = [
-        new Position(x, -5),
-        new Transform(size, size),
-        new Speed(speed),
-        new Direction(0, 1),
-      ];
-      components.forEach((c) => this.ecs.addComponent(newStar, c));
       this.lastStarSpawn = now;
-      this.stars.push(newStar);
+      this.stars.push({
+        id,
+        speed,
+        size,
+        position: { x, y: -5 },
+      });
     }
-    this.stars.forEach((e) => {
-      const comps = this.ecs.getComponents(e);
+    this.stars.forEach((star) => {
+      const { id, position, size, speed } = star;
+      // this.stars = this.stars.filter(ent => ent !== e)
 
-      if(!comps) {
-        this.stars = this.stars.filter(ent => ent !== e)
-        return;
-      }
-
-      const pos = comps.get(Position);
-      const { width } = comps.get(Transform);
-
-      if (pos.y > canvas.height) {
-        this.stars = this.stars.filter((s) => s !== e);
-        this.ecs.removeEntity(e);
+      if (position.y > canvas.height) {
+        this.stars = this.stars.filter((s) => s.id !== id);
         return;
       }
 
       ctx.save();
-      const color = this.starColors[pos.x % this.starColors.length];
+      const color = this.starColors[position.x % this.starColors.length];
       ctx.strokeStyle = color;
       ctx.fillStyle = color;
       ctx.beginPath();
-      ctx.fillRect(Math.round(pos.x), Math.round(pos.y), width, width);
-      if (width >= 3) {
-        ctx.fillStyle = "#fcfcfc";
-        ctx.fillRect(Math.round(pos.x) + 1, Math.round(pos.y) + 1, 1, 1);
-      }
+      ctx.fillRect(Math.round(position.x), Math.round(position.y), size, size);
       ctx.restore();
+
+      // Update star position
+      if (!GAMESTATE.paused || GAMESTATE.scene === "titleScreen")
+        position.y += speed * delta;
     });
   }
 
@@ -192,14 +158,13 @@ export default class RenderingSystem extends System {
         );
         ctx.restore();
       }
-      if(!GAMESTATE.paused && tag?.value === EntityTag.PLAYER) {
+      if (!GAMESTATE.paused && tag?.value === EntityTag.PLAYER) {
         for (let i = 0; i < health.curr * 3; i += 3) {
           ctx.save();
-          ctx.fillStyle = "#a81000"
-          ctx.fillRect(pos.x + 10 + i, pos.y + transform.height + 1, 2, 2)
+          ctx.fillStyle = "#a81000";
+          ctx.fillRect(pos.x + 7 + i, pos.y + transform.height + 1, 2, 2);
           ctx.restore();
         }
-
       }
     });
   }
@@ -267,11 +232,11 @@ export default class RenderingSystem extends System {
   drawHUD(delta: number) {
     // Draw pause menu
     const pauseTextLocation = {
-        x: canvas.width / 2,
-        y: canvas.height / 2 - 30
-    }
-    let pauseTextSize: {w: number, h: number}
-    if (GAMESTATE.paused && GAMESTATE.scene !== "menu") {
+      x: canvas.width / 2,
+      y: canvas.height / 2 - 40,
+    };
+    let pauseTextSize: { w: number; h: number };
+    if (GAMESTATE.paused) {
       pauseTextSize = this.drawText(
         GAMESTATE.scene === "game" ? "PAUSED" : "GAME OVER",
         pauseTextLocation.x,
@@ -288,44 +253,58 @@ export default class RenderingSystem extends System {
       );
     }
 
-    // Draw score
-    const scoreTextLocation = GAMESTATE.paused ? {x: Math.floor(canvas.width / 2 - pauseTextSize!.w / 2), y: pauseTextLocation.y + 16 } : {x: 2, y: 2}
-    const scoreTextSize = this.drawText(GAMESTATE.score.toString() + `${GAMESTATE.paused ? " PTS" : ""}`, scoreTextLocation.x, scoreTextLocation.y, {
-      horizontalAlign: Align.START,
-      verticalAlign: Align.START,
-      color: "red",
-      shadow: {
-        color: "#0058f8",
-        offsetX: 1,
-        offsetY: 0,
-      },
-    });
 
-    const livesText = GAMESTATE.paused 
-      ? GAMESTATE.lives + " ships"
-      : Array(GAMESTATE.lives > 0 ? GAMESTATE.lives : 0).fill("♥").join("")
-    // Draw lives
-    GAMESTATE.scene === "game" && this.drawText(
-      livesText,
+    // Draw score
+    const scoreTextLocation = GAMESTATE.paused
+      ? {
+          x: Math.floor(canvas.width / 2 - pauseTextSize!.w / 2),
+          y: pauseTextLocation.y + 16,
+        }
+      : { x: 2, y: 2 };
+    const scoreTextSize = this.drawText(
+      GAMESTATE.score.toString() + `${GAMESTATE.paused ? " PTS" : ""}`,
       scoreTextLocation.x,
-      scoreTextLocation.y + scoreTextSize.h + 2,
+      scoreTextLocation.y,
       {
         horizontalAlign: Align.START,
         verticalAlign: Align.START,
         color: "red",
         shadow: {
-          color: "#a80020",
+          color: "#0058f8",
           offsetX: 1,
           offsetY: 0,
         },
       }
     );
 
-    if (GAMESTATE.paused && GAMESTATE.scene !== "menu") {
+    const livesText = GAMESTATE.paused
+      ? GAMESTATE.lives + " ships"
+      : Array(GAMESTATE.lives > 0 ? GAMESTATE.lives : 0)
+          .fill("♥")
+          .join("");
+    // Draw lives
+    GAMESTATE.scene === "game" &&
+      this.drawText(
+        livesText,
+        scoreTextLocation.x,
+        scoreTextLocation.y + scoreTextSize.h + 2,
+        {
+          horizontalAlign: Align.START,
+          verticalAlign: Align.START,
+          color: "red",
+          shadow: {
+            color: "#a80020",
+            offsetX: 1,
+            offsetY: 0,
+          },
+        }
+      );
+
+    if (GAMESTATE.paused) {
       this.drawText(
         "PRESS R TO RESTART",
         canvas.width / 2,
-        canvas.height - 50,
+        scoreTextLocation.y + 60,
         {
           horizontalAlign: Align.CENTER,
           verticalAlign: Align.CENTER,
@@ -333,6 +312,27 @@ export default class RenderingSystem extends System {
             color: "#00b800",
             offsetX: 1,
             offsetY: 1,
+          },
+        }
+      );
+    }
+
+    const guns = this.ecs
+      .getComponents(GAMESTATE.playerEntity)
+      ?.get(GunInventory);
+    if (!GAMESTATE.paused && GAMESTATE.scene === "game" && guns) {
+      this.drawText(
+        "W" + (guns.active + 1),
+        scoreTextLocation.x,
+        scoreTextLocation.y + scoreTextSize.h * 3,
+        {
+          horizontalAlign: Align.START,
+          verticalAlign: Align.START,
+          color: "red",
+          shadow: {
+            color: "#a80020",
+            offsetX: 1,
+            offsetY: 0,
           },
         }
       );
@@ -352,12 +352,38 @@ export default class RenderingSystem extends System {
       });
   }
 
+  drawTitleScreen(delta: number) {
+    const ctx = this.ctx;
+
+    ctx.save()
+    ctx.drawImage(this.title, 0, this.titleScreenPos);
+    ctx.restore()
+
+    if(this.titleScreenPos < 0) this.titleScreenPos += 250 * delta
+
+    this.startGameTextShow && 
+      this.drawText("Click to start!", canvas.width / 2, canvas.height - canvas.height / 3, {
+        horizontalAlign: Align.CENTER,
+        verticalAlign: Align.CENTER,
+        color: "red",
+        shadow: {
+          color: "#a80020",
+          offsetX: 1,
+          offsetY: 1,
+        },
+      });
+
+  }
+
   public update(entities: Set<Entity>, delta: number): void {
     // DRAW MENU IF GAMESTATE IS NOT RUNNING
 
     // DRAW BACKGROUND
-    this.drawStars();
-    // this.drawBackground(delta);
+    this.drawStars(delta);
+    if (GAMESTATE.scene === "titleScreen") {
+      this.drawTitleScreen(delta)
+      return;
+    }
 
     // DRAW ENTITIES
     this.drawEntities(entities);

@@ -18,9 +18,9 @@ const animations = {
   ),
   explosion_small: createAnimation(
     [
-      { x: 84, y: 84 },
-      { x: 98, y: 84 },
-      { x: 84, y: 98 },
+      { x: 84, y: 112 },
+      { x: 98, y: 112 },
+      { x: 84, y: 126 },
     ],
     "single",
     12,

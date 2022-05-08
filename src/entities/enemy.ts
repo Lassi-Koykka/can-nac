@@ -15,18 +15,19 @@ import {
 } from "../components";
 import { Component, ECS } from "../ecs";
 import {ColliderType, EntityStatus, EntityTag, FireMode, MovementPatternType, SpriteType} from "../enums";
-import {createAnimation} from "../utils";
+import {createAnimation, rotateVector, vecToDir} from "../utils";
 
 export type enemyType = "large1" | "small1" | "small2" | "small3" | "small4"
 const enemy_type_comps = (enemytype: enemyType): Component[] => {
   switch (enemytype) {
   case "large1": return [
-    new Speed(45),
+    new Speed(30),
     new Health(5, 5),
     new Transform(28, 28),
     new Sprite(SpriteType.SPRITE, "blue", {x:28, y:56}),
     new Animations({
       default: createAnimation([{ x:28, y:56 }]),
+      damage: createAnimation([{ x:84, y:56 }], "single", 12),
       death: animations.explosion_large,
     }),
     new MovementPattern(MovementPatternType.FOLLOW),
@@ -35,12 +36,16 @@ const enemy_type_comps = (enemytype: enemyType): Component[] => {
         fireMode: FireMode.AUTO,
         fireRate: 60,
         damage: 1,
-        bulletType: "laser",
+        bulletType: "ball_purple_small",
         bullets: [
           {dirX: 0, dirY: -1, offsetX: 0, offsetY: -14},
+          {...vecToDir(rotateVector(0, -1, 45)), offsetX: 7, offsetY: -7},
           {dirX: 1, dirY: 0, offsetX: 14, offsetY: 0},
+          {...vecToDir(rotateVector(0, 1, -45)), offsetX: 7, offsetY: 7},
           {dirX: 0, dirY: 1, offsetX: 0, offsetY: 14},
+          {...vecToDir(rotateVector(0, 1, 45)), offsetX: -7, offsetY: 7},
           {dirX: -1, dirY: 0, offsetX: -14, offsetY: 0},
+          {...vecToDir(rotateVector(0, -1, -45)), offsetX: -7, offsetY: -7},
         ]
       },
       {
@@ -56,11 +61,12 @@ const enemy_type_comps = (enemytype: enemyType): Component[] => {
     new Sprite(SpriteType.SPRITE, "blue", {x:0, y:56}),
     new Animations({
       default: createAnimation([{ x:0, y:56 }]),
+      damage: createAnimation([{ x:56, y:56 }], "single", 12),
       death: animations.explosion_small,
     })
   ]
   case "small2": return [
-    new Speed(20),
+    new Speed(40),
     new Health(1, 1),
     new Transform(14, 14),
     new MovementPattern(MovementPatternType.HORIZONTAL_BAF),
@@ -69,8 +75,8 @@ const enemy_type_comps = (enemytype: enemyType): Component[] => {
       {
         fireMode: FireMode.AUTO,
         fireRate: 60,
-        damage: 1,
-        bulletType: "laser",
+        damage: 2,
+        bulletType: "ball_purple",
         bullets: [
           {dirX: 0, dirY: 1},
         ]
@@ -82,6 +88,7 @@ const enemy_type_comps = (enemytype: enemyType): Component[] => {
     ),
     new Animations({
       default: createAnimation([{ x:14, y:56 }]),
+      damage: createAnimation([{ x:70, y:56 }], "single", 12),
       death: animations.explosion_small,
     })
   ]
@@ -94,6 +101,36 @@ const enemy_type_comps = (enemytype: enemyType): Component[] => {
     new MovementPattern(MovementPatternType.SINE_HORIZONTAL),
     new Animations({
       default: createAnimation([{ x:0, y:70 }]),
+      damage: createAnimation([{ x:56, y:70 }], "single", 12),
+      death: animations.explosion_small,
+    }),
+    new AutofireGun(
+      {
+        fireMode: FireMode.AUTO,
+        fireRate: 60,
+        damage: 2,
+        bulletType: "ball_purple_small",
+        bullets: [
+          vecToDir(rotateVector(0, 1, 45)),
+          vecToDir(rotateVector(0, 1, -45)),
+        ]
+      },
+      {
+        x: 7,
+        y: 18
+      }
+    ),
+  ]
+  case "small4":
+  return [
+    new Speed(20),
+    new Health(1, 1),
+    new Transform(14, 14),
+    new Sprite(SpriteType.SPRITE, "blue", {x:14, y:70}),
+    new MovementPattern(MovementPatternType.SINE_VERTICAL),
+    new Animations({
+      default: createAnimation([{ x:14, y:70 }]),
+      damage: createAnimation([{ x:70, y:70 }], "single", 12),
       death: animations.explosion_small,
     }),
     new AutofireGun(
@@ -101,7 +138,7 @@ const enemy_type_comps = (enemytype: enemyType): Component[] => {
         fireMode: FireMode.AUTO,
         fireRate: 60,
         damage: 1,
-        bulletType: "laser",
+        bulletType: "laser_h",
         bullets: [
           {dirX: 1, dirY: 0, offsetX: 7, offsetY: 0},
           {dirX: -1, dirY: 0, offsetX: -7, offsetY: 0},
@@ -112,17 +149,6 @@ const enemy_type_comps = (enemytype: enemyType): Component[] => {
         y: 8
       }
     ),
-  ]
-  case "small4":
-  return [
-    new Speed(20),
-    new Health(1, 1),
-    new Transform(14, 14),
-    new Sprite(SpriteType.SPRITE, "blue", {x:14, y:70}),
-    new Animations({
-      default: createAnimation([{ x:14, y:70 }]),
-      death: animations.explosion_small,
-    })
   ]
   }
 }

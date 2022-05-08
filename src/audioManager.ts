@@ -12,7 +12,7 @@ export const createAudioManager = (
     audioCtx,
     buffers,
     playClip: (clip: string, options = {}) => {
-      const { when, volume, offset, duration, loop } = options;
+      const { when, volume, offset, duration, loop, onEnded } = options;
       const buf = buffers[clip];
       if (buf) {
         const source = audioCtx.createBufferSource();
@@ -23,6 +23,7 @@ export const createAudioManager = (
         source.connect(clipGain)
         clipGain.connect(masterGain)
         source.start(when, offset, duration);
+        if(onEnded) source.onended = () => onEnded()
       }
     },
   };

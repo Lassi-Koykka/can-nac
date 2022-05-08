@@ -9,12 +9,21 @@ import EnemySpawnerSystem from "./systems/enemySpawnerSystem";
 import PatternMovementSystem from "./systems/patternMovementSystem";
 import PlayerInputSystem from "./systems/playerInputSystem";
 import RenderingSystem from "./systems/renderingSystem";
-import {IFont} from "./types";
-import { indexChars, loadAudioClips, loadImage } from "./utils";
+import { IFont } from "./types";
+import {
+  indexChars,
+  loadAudioClips,
+  loadImage,
+  newGame,
+  setCanvasScale,
+} from "./utils";
 
 // --- Canvas ---
 globalThis.canvas = document.querySelector<HTMLCanvasElement>("#gameCanvas")!;
 canvas.tabIndex = 1;
+setCanvasScale();
+
+window.onresize = () => setCanvasScale();
 
 // --- Context ---
 const ctx = canvas.getContext("2d")!;
@@ -42,8 +51,8 @@ const resetKeymap = () => {
 
 window.addEventListener("keydown", updateKeyMap);
 window.addEventListener("keyup", updateKeyMap);
-window.addEventListener("blur", () => resetKeymap());
-window.addEventListener("focus", () => resetKeymap());
+window.onblur = () => resetKeymap();
+window.onfocus = () => resetKeymap();
 
 // --------------------------
 // LOAD ASSETS AND START GAME
@@ -72,13 +81,22 @@ window.addEventListener("focus", () => resetKeymap());
       name: "hitHurtEnemy",
       url: "assets/hitHurt2.wav",
     },
+    {
+      name: "intro",
+      url: "assets/intro.wav",
+    },
+    {
+      name: "main",
+      url: "assets/main.wav",
+    },
   ];
-  const [audioClipBuffers, spritesheetImg, backgroundImg, defaultFontImg] = await Promise.all([
-    loadAudioClips(audioCtx, AUDIOCLIPS),
-    loadImage("assets/spritesheet.png"),
-    loadImage("assets/background.png"),
-    loadImage("assets/default-font-no-shadow.png")
-  ]);
+  const [audioClipBuffers, spritesheetImg, titleImg, defaultFontImg] =
+    await Promise.all([
+      loadAudioClips(audioCtx, AUDIOCLIPS),
+      loadImage("assets/spritesheet.png"),
+      loadImage("assets/title.png"),
+      loadImage("assets/default-font-no-shadow.png"),
+    ]);
 
   globalThis.AUDIO_MANAGER = createAudioManager(
     audioCtx,
@@ -86,15 +104,15 @@ window.addEventListener("focus", () => resetKeymap());
     0.2
   );
 
-  const fonts: {[key: string]: IFont} = {
-    "default": {
+  const fonts: { [key: string]: IFont } = {
+    default: {
       img: defaultFontImg,
       characterIndexes: indexChars("abcdefghijklmnopqrstuvwxyz0123456789.!-:♥"),
       charWidth: 9,
       charHeight: 11,
-      caseSensitive: false
-    }
-  }
+      caseSensitive: false,
+    },
+  };
 
   // --- INITIALIZE ECS ---
   const ecs = new ECS();
@@ -106,11 +124,13 @@ window.addEventListener("focus", () => resetKeymap());
     collisionSystem: new CollisionSystem(),
     enemySpawnerSystem: new EnemySpawnerSystem(3),
     animationSystem: new AnimationSystem(),
-    renderingSystem: new RenderingSystem(ctx, {
-      backgroundImg,
-      spritesheetImg,
-    },
-    fonts,
+    renderingSystem: new RenderingSystem(
+      ctx,
+      {
+        spritesheetImg,
+        titleImg,
+      },
+      fonts
     ),
   };
 
@@ -120,12 +140,25 @@ window.addEventListener("focus", () => resetKeymap());
   globalThis.GAMESTATE = {
     playerEntity: -1,
     paused: true,
-    scene: "game",
+    scene: "titleScreen",
     lives: 3,
-    score: 0
-  }
+    score: 0,
+  };
 
   spawnPlayer(ecs);
+
+  canvas.addEventListener(
+    "click",
+    async () => {
+      await AUDIO_MANAGER.audioCtx.resume();
+      AUDIO_MANAGER.playClip("intro", { volume: 0.7,
+        onEnded: () => AUDIO_MANAGER.playClip("main", { loop: true, volume: 0.7 }),
+      });
+
+      setTimeout(() => newGame(ecs), 100);
+    },
+    { once: true }
+  );
 
   // --- ANIMATION PROPERTIES ---
   let lastTime = 0;
@@ -133,31 +166,30 @@ window.addEventListener("focus", () => resetKeymap());
   const nextFrame = 1000 / maxFps;
 
   // --- START GAME LOOP ---
-  
 
   requestAnimationFrame(loop);
   function loop(t: number) {
     requestAnimationFrame(loop);
     const delta = t - lastTime;
-    if(delta <= nextFrame) return
+    if (delta <= nextFrame) return;
 
     // PAUSE GAME
     [
       "autofireSystem",
       "collisionSystem",
       "enemySpawnerSystem",
-      "animationSystem"
-    ].forEach(s => {
-      const sys = SYSTEMS[s]
-      if(sys && sys.enabled === GAMESTATE.paused) sys.enabled = !GAMESTATE.paused
-    })
-  
+      "animationSystem",
+    ].forEach((s) => {
+      const sys = SYSTEMS[s];
+      if (sys && sys.enabled === GAMESTATE.paused)
+        sys.enabled = !GAMESTATE.paused;
+    });
 
     lastTime = t;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     // Run systems
-    ecs.update(delta/1000);
+    ecs.update(delta / 1000);
 
     // Set keymap history
     KEYMAP_PREV = Object.assign(KEYMAP_PREV, KEYMAP);

@@ -11,7 +11,7 @@ import { shoot } from "../entities/bullet";
 import {spawnPlayer} from "../entities/player";
 import { EntityStatus, FireMode } from "../enums";
 import { keyDown, keyPress } from "../input";
-import { normalizeVector } from "../utils";
+import { newGame, normalizeVector } from "../utils";
 
 export default class PlayerInputSystem extends System {
   componentsRequired = new Set<Function>([
@@ -60,10 +60,19 @@ export default class PlayerInputSystem extends System {
         }
       }
 
+      if(keyPress("SWITCH_WEAPON") && guns) {
+        guns.active = (guns.active + 1) %  guns.gunList.length
+      }
+
+      if(keyPress("WEAPON_NUM")) {
+        const index = ["1", "2", "3"].findIndex(s => KEYMAP[s])
+        if(index !== undefined) guns.active = index
+      }
+
       const gun = guns.getActive();
       if (
-        (gun.fireMode === FireMode.SEMIAUTO && keyPress("ACTION1")) ||
-        (gun.fireMode === FireMode.AUTO && keyDown("ACTION1"))
+        (gun.fireMode === FireMode.SEMIAUTO && keyPress("ACTION")) ||
+        (gun.fireMode === FireMode.AUTO && keyDown("ACTION"))
       ) {
         const defaultOffset = { x: transform.width / 2, y: -5 };
         shoot(this.ecs, gun, pos, EntityStatus.FRIENDLY, defaultOffset);
@@ -75,18 +84,7 @@ export default class PlayerInputSystem extends System {
     // Open menu
     if (keyPress("MENU") && GAMESTATE.scene === "game")
       GAMESTATE.paused = !GAMESTATE.paused;
-    if (keyPress("RESTART") && GAMESTATE.paused) {
-      this.ecs.removeAllEntities()
-      const p = spawnPlayer(this.ecs)
-      GAMESTATE = {
-        paused: false,
-        scene: "game",
-        playerEntity: p,
-        lives: 3,
-        score: 0
-      }
-    }
-
+    if (keyPress("RESTART") && GAMESTATE.paused) newGame(this.ecs)
     // handle in-game listeners
     if (!GAMESTATE.paused && GAMESTATE.scene === "game") this.updateListeners(entities);
   }

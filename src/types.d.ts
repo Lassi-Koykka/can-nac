@@ -1,4 +1,4 @@
-import {ECS, System} from "./ecs";
+import { ECS, System } from "./ecs";
 import { FireMode } from "./enums";
 
 // Global types
@@ -7,13 +7,13 @@ declare global {
   var KEYMAP: Keymap;
   var KEYMAP_PREV: Keymap;
   var AUDIO_MANAGER: IAudioManager;
-  var SYSTEMS: { [name: string]: System};
+  var SYSTEMS: { [name: string]: System };
   var canvas: HTMLCanvasElement;
-  var restart: () => void
+  var restart: () => void;
 }
 
 export interface GameState {
-  scene: "menu" | "game" | "gameOver";
+  scene: "titleScreen" | "game" | "gameOver";
   playerEntity: number;
   paused: boolean;
   score: number;
@@ -31,7 +31,7 @@ export interface SpriteAnimation {
   type: string;
   frames: AnimationFrames;
   fps: number;
-  callback?: (ecs: ECS, entity: number) => void
+  callback?: (ecs: ECS, entity: number) => void;
 }
 
 export interface Gun {
@@ -39,7 +39,7 @@ export interface Gun {
   fireRate: number;
   damage: number;
   bulletType: string;
-  bullets: { dirX: number; dirY: number, offsetX?: number, offsetY?: number }[];
+  bullets: { dirX: number; dirY: number; offsetX?: number; offsetY?: number, type?: string }[];
   lastShotTime?: number;
 }
 
@@ -62,6 +62,7 @@ export interface IAudioManager {
       offset?: number;
       duration?: number;
       loop?: boolean;
+      onEnded?: () => void
     }
   ) => void;
 }
@@ -69,7 +70,14 @@ export interface IAudioManager {
 export interface IFont {
   img: HTMLImageElement;
   characterIndexes: { [key: string]: number };
-  charWidth: number,
+  charWidth: number;
   charHeight: number;
   caseSensitive: boolean;
+}
+
+export interface  IStar {
+  id: number,
+  position: {x: number, y: number},
+  speed: number,
+  size: number
 }

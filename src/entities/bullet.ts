@@ -23,29 +23,67 @@ import { createAnimation } from "../utils";
 
 export const bullet_type_comps = (bulletType: string): Component[] => {
   switch (bulletType) {
-    case "ball":
+    case "ball_purple":
       return [
         new Transform(12, 12, Align.CENTER, Align.CENTER),
-        new Sprite(SpriteType.SPRITE, "yellow", { x: 15, y: 85 }),
+        new Sprite(SpriteType.SPRITE, "green", { x: 58, y: 85 }),
         // new Animations({"default": createAnimation([{x: 0, y: 85}, {x: 7, y: 85}, {x: 14, y: 85}, {x: 21, y: 85}], "loop", 12)})
       ];
-    case "wave":
+    case "ball_green":
+      return [
+        new Transform(12, 12, Align.CENTER, Align.CENTER),
+        new Sprite(SpriteType.SPRITE, "purple", { x: 70, y: 85 }),
+        // new Animations({"default": createAnimation([{x: 0, y: 85}, {x: 7, y: 85}, {x: 14, y: 85}, {x: 21, y: 85}], "loop", 12)})
+      ];
+    case "ball_purple_small":
+      return [
+        new Transform(5, 5, Align.CENTER, Align.CENTER),
+        new Sprite(SpriteType.SPRITE, "green", { x: 57, y: 99 }),
+        // new Animations({"default": createAnimation([{x: 0, y: 85}, {x: 7, y: 85}, {x: 14, y: 85}, {x: 21, y: 85}], "loop", 12)})
+      ];
+    case "ball_green_small":
+      return [
+        new Transform(5, 5, Align.CENTER, Align.CENTER),
+        new Sprite(SpriteType.SPRITE, "purple", { x: 62, y: 99 }),
+        // new Animations({"default": createAnimation([{x: 0, y: 85}, {x: 7, y: 85}, {x: 14, y: 85}, {x: 21, y: 85}], "loop", 12)})
+      ];
+    case "wave_u":
       return [
         new Transform(12, 5, Align.CENTER, Align.CENTER),
         new Sprite(SpriteType.SPRITE, "yellow", { x: 1, y: 99 }),
+      ];
+    case "wave_d":
+      return [
+        new Transform(12, 5, Align.CENTER, Align.CENTER),
+        new Sprite(SpriteType.SPRITE, "yellow", { x: 1, y: 105 }),
+      ];
+    case "wave_l":
+      return [
+        new Transform(5, 12, Align.CENTER, Align.CENTER),
+        new Sprite(SpriteType.SPRITE, "yellow", { x: 1, y: 85 }),
+      ];
+    case "wave_r":
+      return [
+        new Transform(5, 12, Align.CENTER, Align.CENTER),
+        new Sprite(SpriteType.SPRITE, "yellow", { x: 8, y: 85 }),
+      ];
+    case "laser_h":
+      return [
+        new Transform(12, 4, Align.CENTER, Align.CENTER),
+        new Sprite(SpriteType.SPRITE, "yellow", { x: 15, y: 83 }),
         new Animations({
           default: createAnimation(
             [
-              { x: 1, y: 99 },
-              { x: 1, y: 105 },
+              { x: 15, y: 84 },
+              { x: 15, y: 89 },
+              { x: 15, y: 94 },
             ],
             "loop",
             12
           ),
         }),
       ];
-
-    case "laser":
+    case "laser_v":
       return [
         new Transform(4, 12, Align.CENTER, Align.CENTER),
         new Sprite(SpriteType.SPRITE, "yellow", { x: 14, y: 99 }),
@@ -124,14 +162,14 @@ export const shoot = (
   if (!gun.lastShotTime || now - gun.lastShotTime > fireDelay) {
     AUDIO_MANAGER.playClip("laserShot");
     gun.lastShotTime = now;
-    gun.bullets.forEach(({ dirX, dirY, offsetX, offsetY }) => {
+    gun.bullets.forEach(({ dirX, dirY, offsetX, offsetY, type }) => {
       spawnBullet(
         ecs,
         status,
         pos.x + (offsetX ? defaultOffset.x + offsetX : defaultOffset.x),
         pos.y + (offsetY ? defaultOffset.y + offsetY : defaultOffset.y),
         { x: dirX, y: dirY },
-        gun.bulletType,
+        type ?? gun.bulletType,
         gun.damage
       );
     });

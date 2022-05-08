@@ -80,7 +80,7 @@ export default class CollisionSystem extends System {
             col.enabled = false;
             setTimeout(() => (col.enabled = true), 1000);
 
-            if (health.curr < 1) {
+            if (Math.floor(health.curr) <= 0) {
               //Player died
               GAMESTATE.lives -= 1;
               dir.x = 0;
@@ -95,7 +95,7 @@ export default class CollisionSystem extends System {
                 }, 2000);
               } else {
                 GAMESTATE.paused = true;
-                GAMESTATE.scene = "gameOver";
+                GAMESTATE.scene = "gameOver"
               }
             }
           }
@@ -120,6 +120,7 @@ export default class CollisionSystem extends System {
             if (target) {
               if (target?.health?.curr) {
                 target.health.curr -= 1;
+                if(target.anim?.animations?.damage) target.anim.setState("damage")
                 AUDIO_MANAGER.playClip("hitHurtEnemy");
               } else {
                 // Target dies

@@ -3,9 +3,11 @@ export const INPUT = {
   DOWN: ["s", "arrowdown"],
   LEFT: ["a", "arrowleft"],
   RIGHT: ["d", "arrowright"],
-  ACTION1: [" "],
-  MENU: ["escape"],
-  RESTART: ["r"]
+  ACTION: [" "],
+  MENU: ["escape", "p"],
+  RESTART: ["r"],
+  SWITCH_WEAPON: ["q", "alt"],
+  WEAPON_NUM: ["1", "2", "3"]
 };
 
 export const keyDown = (input: keyof typeof INPUT) =>

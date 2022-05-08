@@ -7,22 +7,22 @@ html {
   background-color: #272727;
 }
 
+body {
+  overflow: hidden;
+}
+
 #app {
+  display: flex;
+  justify-content: center;
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
-  margin-top: 60px;
   color: #2c3e50;
 }
 
-
 canvas {
-  transform: translateY(100%) scale(3) ;
-  /* width: 1024px; */
-  /* height: 640px; */
-  margin: auto;
-  display: block;
+  /* transform-origin: top center; */
   background-color: #000;
   image-rendering: pixelated;
 }

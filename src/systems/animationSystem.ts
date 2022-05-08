@@ -40,6 +40,7 @@ export default class AnimationSystem extends System {
             animation.callback(this.ecs, e);
             return;
           }
+          a.setState("default")
         } else if (
           animation.type === "hold" &&
           a.currFrame >= animation.frames.length

@@ -1,6 +1,7 @@
 import { BufferLoader } from "./bufferloader";
 import { Position, Transform } from "./components";
-import {ECS} from "./ecs";
+import { ECS } from "./ecs";
+import {spawnPlayer} from "./entities/player";
 import { Align } from "./enums";
 import { AnimationFrames, AnimationType, SpriteAnimation } from "./types";
 
@@ -76,8 +77,18 @@ export const toRadians = (deg: number) => {
 };
 
 export const getOrigin = (
-  { x, y }: { x: number, y: number},
-  { width, height, horizontalAlign, verticalAlign }: {width: number, height: number, horizontalAlign: Align, verticalAlign: Align}
+  { x, y }: { x: number; y: number },
+  {
+    width,
+    height,
+    horizontalAlign,
+    verticalAlign,
+  }: {
+    width: number;
+    height: number;
+    horizontalAlign: Align;
+    verticalAlign: Align;
+  }
 ) => {
   return {
     x: removeOffset(x, width, horizontalAlign),
@@ -98,21 +109,22 @@ const removeOffset = (coord: number, size: number, align: Align) => {
   }
 };
 
-export const clamp = (num: number, min: number, max: number) => Math.min(Math.max(num, min), max)
+export const clamp = (num: number, min: number, max: number) =>
+  Math.min(Math.max(num, min), max);
 
 // Misc
 
-export const clone = (instance: any) =>  {
+export const clone = (instance: any) => {
   return Object.assign(
     Object.create(
       // Set the prototype of the new object to the prototype of the instance.
       // Used to allow new object behave like class instance.
-      Object.getPrototypeOf(instance),
+      Object.getPrototypeOf(instance)
     ),
     // Prevent shallow copies of nested structures like arrays, etc
-    JSON.parse(JSON.stringify(instance)),
+    JSON.parse(JSON.stringify(instance))
   );
-}
+};
 export const createAnimation = (
   frames: AnimationFrames = [],
   type: AnimationType = "loop",
@@ -142,3 +154,28 @@ export const getDirKey = (dir: { x: number; y: number }) => {
   return "default";
 };
 
+export const vecToDir = ({x,y}: {x: number, y: number}) => ({dirX: x, dirY: y})
+
+export const setCanvasScale = () => {
+  const aspectRatio = canvas.width / canvas.height;
+
+  if (window.innerWidth < window.innerHeight * aspectRatio) {
+    canvas.style.width = "100%";
+    canvas.style.height = "auto";
+  } else {
+    canvas.style.width = "auto";
+    canvas.style.height = "95vh";
+  }
+};
+
+export const newGame = (ecs: ECS) => {
+      ecs.removeAllEntities()
+      const p = spawnPlayer(ecs)
+      GAMESTATE = {
+        paused: false,
+        scene: "game",
+        playerEntity: p,
+        lives: 3,
+        score: 0
+      }
+}
