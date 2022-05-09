@@ -3,17 +3,16 @@ import {
   GunInventory,
   Health,
   Position,
-  Speed,
   Sprite,
   Tag,
   Transform,
 } from "../components";
-import { Component, Entity, System } from "../ecs";
+import { Entity, System } from "../ecs";
 import { Align, EntityTag, SpriteType } from "../enums";
 import { IFont, IStar } from "../types";
 import { getDirKey, getOrigin, randomInt } from "../utils";
 
-interface IDrawTextOptions<T = undefined> {
+interface IDrawTextOptions {
   font?: IFont;
   horizontalAlign?: Align;
   verticalAlign?: Align;
@@ -173,7 +172,7 @@ export default class RenderingSystem extends System {
     text: string,
     x: number,
     y: number,
-    options: IDrawTextOptions<typeof this.fonts>
+    options: IDrawTextOptions
   ) {
     const ctx = this.ctx;
     const {

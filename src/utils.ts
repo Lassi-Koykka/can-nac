@@ -1,5 +1,4 @@
 import { BufferLoader } from "./bufferloader";
-import { Position, Transform } from "./components";
 import { ECS } from "./ecs";
 import {spawnPlayer} from "./entities/player";
 import { Align } from "./enums";

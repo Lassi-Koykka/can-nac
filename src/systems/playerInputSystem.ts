@@ -8,7 +8,6 @@ import {
 } from "../components";
 import { Entity, System } from "../ecs";
 import { shoot } from "../entities/bullet";
-import {spawnPlayer} from "../entities/player";
 import { EntityStatus, FireMode } from "../enums";
 import { keyDown, keyPress } from "../input";
 import { newGame, normalizeVector } from "../utils";

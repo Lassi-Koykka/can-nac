@@ -1,6 +1,6 @@
 import { Component } from "./ecs";
 import {Align, ColliderType, EntityStatus, EntityTag, MovementPatternType, SpriteType} from "./enums";
-import {AudioClip, Gun, SpriteAnimation} from "./types";
+import {Gun, SpriteAnimation} from "./types";
 import {createAnimation} from "./utils";
 
 export class Position extends Component {
