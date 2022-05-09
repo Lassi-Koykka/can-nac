@@ -1,5 +1,5 @@
-# Typescript Canvas shmup game
-An ECS driven shoot-em-up game a created using vanilla canvas.
+# CAN-NAC
+An ECS driven shoot-em-up game a created using vanilla canvas and typescript.
 
 ## TODO
 
